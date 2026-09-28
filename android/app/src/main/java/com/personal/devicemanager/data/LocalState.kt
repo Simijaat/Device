@@ -21,4 +21,25 @@ class LocalState(context: Context) {
     var autoDeleteEnabled: Boolean
         get() = prefs.getBoolean("autoDeleteEnabled", false)
         set(value) = prefs.edit().putBoolean("autoDeleteEnabled", value).apply()
+
+    // Feature Toggles
+    var locationCollectionEnabled: Boolean
+        get() = prefs.getBoolean("locationCollectionEnabled", false)
+        set(value) = prefs.edit().putBoolean("locationCollectionEnabled", value).apply()
+
+    var smsCollectionEnabled: Boolean
+        get() = prefs.getBoolean("smsCollectionEnabled", false)
+        set(value) = prefs.edit().putBoolean("smsCollectionEnabled", value).apply()
+
+    var callLogCollectionEnabled: Boolean
+        get() = prefs.getBoolean("callLogCollectionEnabled", false)
+        set(value) = prefs.edit().putBoolean("callLogCollectionEnabled", value).apply()
+
+    var contactsCollectionEnabled: Boolean
+        get() = prefs.getBoolean("contactsCollectionEnabled", false)
+        set(value) = prefs.edit().putBoolean("contactsCollectionEnabled", value).apply()
+
+    var appInventoryCollectionEnabled: Boolean
+        get() = prefs.getBoolean("appInventoryCollectionEnabled", false)
+        set(value) = prefs.edit().putBoolean("appInventoryCollectionEnabled", value).apply()
 }
