@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/dashboardFragment">
+
+    <fragment
+        android:id="@+id/dashboardFragment"
+        android:name="com.personal.devicemanager.ui.DashboardFragment"
+        android:label="Dashboard" />
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.personal.devicemanager.ui.SettingsFragment"
+        android:label="Settings" />
+
+    <fragment
+        android:id="@+id/permissionFragment"
+        android:name="com.personal.devicemanager.ui.PermissionFragment"
+        android:label="Permissions" />
+
+    <fragment
+        android:id="@+id/deviceInfoFragment"
+        android:name="com.personal.devicemanager.ui.DeviceInfoFragment"
+        android:label="Device Info" />
+
+</navigation>
