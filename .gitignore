@@ -31,3 +31,7 @@ web/node_modules/
 # Backend
 backend/dist/
 backend/node_modules/
+
+# Make sure all environments are excluded
+**/.env
+**/.env.*

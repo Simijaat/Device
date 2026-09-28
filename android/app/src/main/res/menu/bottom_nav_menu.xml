@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/dashboardFragment"
+        android:title="Dashboard" />
+    <item
+        android:id="@+id/deviceInfoFragment"
+        android:title="Info" />
+    <item
+        android:id="@+id/permissionFragment"
+        android:title="Permissions" />
+    <item
+        android:id="@+id/settingsFragment"
+        android:title="Settings" />
+</menu>
