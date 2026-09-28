@@ -1,0 +1,33 @@
+# Node
+node_modules/
+dist/
+build/
+npm-debug.log
+.env
+.env.*.local
+.DS_Store
+
+# Android
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Web
+web/dist/
+web/node_modules/
+
+# Backend
+backend/dist/
+backend/node_modules/
