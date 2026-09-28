@@ -12,67 +12,52 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Settings"
+            android:text="Dashboard"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:layout_marginBottom="24dp"/>
-
-        <Switch
-            android:id="@+id/switchMasterCollection"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Master Collection Enabled"
-            android:textSize="16sp"
             android:layout_marginBottom="16dp"/>
-
-        <Switch
-            android:id="@+id/switchLocation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Collect Location"
-            android:textSize="16sp"
-            android:layout_marginBottom="8dp"/>
-
-        <Switch
-            android:id="@+id/switchSms"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Collect SMS"
-            android:textSize="16sp"
-            android:layout_marginBottom="8dp"/>
-
-        <Switch
-            android:id="@+id/switchCalls"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Collect Calls"
-            android:textSize="16sp"
-            android:layout_marginBottom="8dp"/>
-
-        <Switch
-            android:id="@+id/switchContacts"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Collect Contacts"
-            android:textSize="16sp"
-            android:layout_marginBottom="8dp"/>
-
-        <Switch
-            android:id="@+id/switchApps"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Collect App Inventory"
-            android:textSize="16sp"
-            android:layout_marginBottom="24dp"/>
 
         <Button
-            android:id="@+id/btnClearAll"
+            android:id="@+id/btnSyncAll"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Clear All Local Data"
-            android:backgroundTint="#d32f2f"
-            android:textColor="#ffffff"
+            android:text="Sync All Local Data"
             android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/tvLocation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Location: Loading..."
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/tvContacts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Contacts: 0"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/tvSms"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Messages: 0"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/tvCalls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Calls: 0"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/tvApps"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Apps: 0"
+            android:layout_marginBottom="8dp"/>
 
     </LinearLayout>
 </ScrollView>

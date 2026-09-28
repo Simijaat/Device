@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Permissions"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/btnReqLocation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Request Location Permission"
+        android:layout_marginBottom="8dp"/>
+
+    <Button
+        android:id="@+id/btnReqContacts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Request Contacts Permission"
+        android:layout_marginBottom="8dp"/>
+
+    <Button
+        android:id="@+id/btnReqSms"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Request SMS Permission"
+        android:layout_marginBottom="8dp"/>
+
+    <Button
+        android:id="@+id/btnReqCallLog"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Request Call Log Permission"
+        android:layout_marginBottom="8dp"/>
+
+</LinearLayout>
