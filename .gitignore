@@ -35,3 +35,9 @@ backend/node_modules/
 # Make sure all environments are excluded
 **/.env
 **/.env.*
+.gitignore
+backend/.env
+backend/local.db
+backend/server.log
+web/web.log
+web/.env
