@@ -1,0 +1,66 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Background Gradient -->
+    <path
+        android:pathData="M0,0h108v108h-108z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="0"
+                android:startY="0"
+                android:endX="108"
+                android:endY="108">
+                <item android:color="#FF7F7FD5" android:offset="0.0" />
+                <item android:color="#FF86A8E7" android:offset="0.5" />
+                <item android:color="#FF91EAE4" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Glass Effect Shadow (Bottom right) -->
+    <path
+        android:fillColor="#33000000"
+        android:pathData="M24,24 L84,24 A12,12 0 0 1 96,36 L96,96 A12,12 0 0 1 84,108 L24,108 A12,12 0 0 1 12,96 L12,36 A12,12 0 0 1 24,24 Z" />
+
+    <!-- Main Glass Card -->
+    <path
+        android:pathData="M20,20 L80,20 A16,16 0 0 1 96,36 L96,76 A16,16 0 0 1 80,92 L20,92 A16,16 0 0 1 4,76 L4,36 A16,16 0 0 1 20,20 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="4"
+                android:startY="20"
+                android:endX="96"
+                android:endY="92">
+                <item android:color="#80FFFFFF" android:offset="0.0" />
+                <item android:color="#20FFFFFF" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    
+    <!-- Inner border for glass reflection -->
+    <path
+        android:strokeColor="#AAFFFFFF"
+        android:strokeWidth="1.5"
+        android:pathData="M20,21 L80,21 A15,15 0 0 1 95,36 L95,76 A15,15 0 0 1 80,91 L20,91 A15,15 0 0 1 5,76 L5,36 A15,15 0 0 1 20,21 Z" />
+
+    <!-- Center Icon: Device shape (Phone) -->
+    <path
+        android:fillColor="#E6FFFFFF"
+        android:pathData="M38,28 L62,28 A4,4 0 0 1 66,32 L66,80 A4,4 0 0 1 62,84 L38,84 A4,4 0 0 1 34,80 L34,32 A4,4 0 0 1 38,28 Z" />
+        
+    <!-- Device Screen (Transparent cut-out look) -->
+    <path
+        android:fillColor="#40000000"
+        android:pathData="M37,34 L63,34 L63,74 L37,74 Z" />
+
+    <!-- Settings Gear Overlay -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M70.3,59.3 l-2.6,-0.4 c-0.2,-0.9 -0.5,-1.7 -0.9,-2.5 l1.7,-2 c0.6,-0.7 0.5,-1.8 -0.2,-2.4 l-3.1,-3.1 c-0.7,-0.7 -1.8,-0.8 -2.4,-0.2 l-2,1.7 c-0.8,-0.4 -1.6,-0.7 -2.5,-0.9 l-0.4,-2.6 c-0.1,-1 -1,-1.7 -2,-1.7 h-4.4 c-1,0 -1.9,0.7 -2,1.7 l-0.4,2.6 c-0.9,0.2 -1.7,0.5 -2.5,0.9 l-2,-1.7 c-0.7,-0.6 -1.8,-0.5 -2.4,0.2 l-3.1,3.1 c-0.7,0.7 -0.8,1.8 -0.2,2.4 l1.7,2 c-0.4,0.8 -0.7,1.6 -0.9,2.5 l-2.6,0.4 c-1,0.1 -1.7,1 -1.7,2 v4.4 c0,1 0.7,1.9 1.7,2 l2.6,0.4 c0.2,0.9 0.5,1.7 0.9,2.5 l-1.7,2 c-0.6,0.7 -0.5,1.8 0.2,2.4 l3.1,3.1 c0.7,0.7 1.8,0.8 2.4,0.2 l2,-1.7 c0.8,0.4 1.6,0.7 2.5,0.9 l0.4,2.6 c0.1,1 1,1.7 2,1.7 h4.4 c1,0 1.9,-0.7 2,-1.7 l0.4,-2.6 c0.9,-0.2 1.7,-0.5 2.5,-0.9 l2,1.7 c0.7,0.6 1.8,0.5 2.4,-0.2 l3.1,-3.1 c0.7,-0.7 0.8,-1.8 0.2,-2.4 l-1.7,-2 c0.4,-0.8 0.7,-1.6 0.9,-2.5 l2.6,-0.4 c1,-0.1 1.7,-1 1.7,-2 v-4.4 C72,60.3 71.3,59.4 70.3,59.3 Z M53.8,67.6 c-3.4,0 -6.1,-2.7 -6.1,-6.1 c0,-3.4 2.7,-6.1 6.1,-6.1 c3.4,0 6.1,2.7 6.1,6.1 C59.9,64.9 57.2,67.6 53.8,67.6 Z" />
+</vector>

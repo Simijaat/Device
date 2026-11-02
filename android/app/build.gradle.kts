@@ -71,8 +71,27 @@ dependencies {
 
     // Preferences DataStore
 
+    // Security Crypto for EncryptedSharedPreferences
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+
+    // Retrofit     // Preferences DataStore OkHttp
+    val retrofitVersion = "2.9.0"
+    implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
+    implementation("com.squareup.retrofit2:converter-gson:$retrofitVersion")
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
+
+    // Gson for JSON parsing
+    implementation("com.google.code.gson:gson:2.10.1")
+
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.mockito:mockito-core:4.8.0")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+}
+
+android {
+    lint {
+        baseline = file("lint-baseline.xml")
+    }
 }

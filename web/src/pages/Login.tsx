@@ -1,12 +1,86 @@
-import React from "react";
-
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { apiClient } from "../services/apiClient";
 
 export const Login: React.FC = () => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const result = await apiClient.login(username, password);
+      if (result.success) {
+        localStorage.setItem("auth_token", result.token);
+        navigate("/");
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.error || "Login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="flex h-screen items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold mb-6 text-center">Login to Device Manager</h1>
-        <p className="text-gray-600 text-center">Login placeholder</p>
+    <div className="flex h-screen items-center justify-center bg-gradient-to-br from-indigo-100 via-purple-50 to-blue-100 overflow-hidden relative">
+      <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-2xl opacity-40 animate-blob"></div>
+      <div className="absolute top-1/3 right-1/4 w-72 h-72 bg-indigo-300 rounded-full mix-blend-multiply filter blur-2xl opacity-40 animate-blob animation-delay-2000"></div>
+      <div className="absolute bottom-1/4 left-1/2 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-2xl opacity-40 animate-blob animation-delay-4000"></div>
+
+      <div className="w-full max-w-md p-10 liquid-glass rounded-[2rem] shadow-2xl relative z-10 mx-4">
+        <div className="flex flex-col items-center mb-8">
+           <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-500 shadow-lg flex items-center justify-center text-white font-bold text-3xl mb-4">
+             D
+           </div>
+           <h1 className="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-800 to-purple-800 tracking-tight text-center">
+             Device Manager
+           </h1>
+        </div>
+        
+        {error && (
+          <div className="mb-6 p-4 rounded-xl bg-red-50/80 border border-red-100 text-red-600 text-sm font-medium text-center backdrop-blur-sm">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleLogin} className="space-y-6">
+          <div className="space-y-1">
+            <label className="block text-sm font-semibold text-indigo-900/70 pl-1">Username</label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full rounded-xl bg-white/60 border border-white/80 focus:border-indigo-400 focus:ring focus:ring-indigo-200/50 shadow-sm p-3 transition-all backdrop-blur-md text-gray-800"
+              placeholder="Enter your username"
+              required
+            />
+          </div>
+          
+          <div className="space-y-1">
+            <label className="block text-sm font-semibold text-indigo-900/70 pl-1">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full rounded-xl bg-white/60 border border-white/80 focus:border-indigo-400 focus:ring focus:ring-indigo-200/50 shadow-sm p-3 transition-all backdrop-blur-md text-gray-800"
+              placeholder="••••••••"
+              required
+            />
+          </div>
+          
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-lg text-white font-bold bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-70 disabled:transform-none"
+          >
+            {loading ? "Authenticating..." : "Sign in to Dashboard"}
+          </button>
+        </form>
       </div>
     </div>
   );

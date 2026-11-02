@@ -1,3 +1,26 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer utilities {
+  .liquid-glass {
+    @apply bg-white/40 backdrop-blur-xl border border-white/50 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)];
+  }
+  
+  .liquid-glass-dark {
+    @apply bg-gray-900/50 backdrop-blur-xl border border-gray-700/50 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)];
+  }
+
+  .liquid-card {
+    @apply liquid-glass rounded-2xl p-6 transition-all duration-300 hover:bg-white/50 hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.1)];
+  }
+  
+  .glass-button {
+    @apply bg-white/30 hover:bg-white/50 backdrop-blur-md border border-white/40 shadow-sm text-gray-800 font-medium py-2 px-4 rounded-xl transition-all duration-300;
+  }
+}
+
+body {
+  @apply bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen text-gray-800 antialiased;
+  background-attachment: fixed;
+}
