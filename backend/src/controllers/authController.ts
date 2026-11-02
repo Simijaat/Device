@@ -70,7 +70,9 @@ export const register = async (req: Request, res: Response) => {
   }
 };
 
-export const me = async (req: Request, res: Response) => {
-    // @ts-ignore
+import { AuthRequest } from "../middleware/authMiddleware";
+
+export const me = async (req: AuthRequest, res: Response) => {
+
     res.json({ success: true, user: req.user });
 };
