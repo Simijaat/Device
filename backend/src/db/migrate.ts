@@ -6,7 +6,11 @@ async function migrate() {
   console.log('Starting database migration...');
 
   try {
-    const schemaPath = path.join(__dirname, 'schema.sql');
+    let schemaPath = path.join(__dirname, 'schema.sql');
+    if (!fs.existsSync(schemaPath)) {
+      // Try finding it relative to src if running from dist
+      schemaPath = path.join(__dirname, '../../src/db/schema.sql');
+    }
     const schemaSql = fs.readFileSync(schemaPath, 'utf8');
 
     // Split the SQL file into separate statements
