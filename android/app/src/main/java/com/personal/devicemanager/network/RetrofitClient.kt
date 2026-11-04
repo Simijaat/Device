@@ -10,7 +10,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
     // 10.0.2.2 is the special IP alias to your host loopback interface on Android Emulator
-    private const val BASE_URL = "http://10.0.2.2:3000/"
+    private const val BASE_URL = "https://backend-ttnl.onrender.com/"
 
     fun getApiService(context: Context): ApiService {
         val encryptedPrefsManager = EncryptedPrefsManager(context)
