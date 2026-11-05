@@ -18,9 +18,7 @@ export const Layout: React.FC = () => {
       <nav className="w-72 m-4 liquid-glass rounded-3xl flex flex-col overflow-hidden relative z-10">
         <div className="p-6 pb-2">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 shadow-lg flex items-center justify-center text-white font-bold text-xl">
-              D
-            </div>
+            <img src="/favicon.svg" alt="Logo" className="w-10 h-10 drop-shadow-md" />
             <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-700 to-purple-700 tracking-tight">Device Manager</h2>
           </div>
         </div>

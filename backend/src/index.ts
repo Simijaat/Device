@@ -42,7 +42,11 @@ const apiLimiter = rateLimit({
   message: { success: false, error: 'Too many API requests, please try again later.' }
 });
 
-// Basic health-check API
+// Basic root and health-check API
+app.get('/', (req: Request, res: Response) => {
+  res.json({ status: 'Device Manager API is running', health: '/health' });
+});
+
 app.get('/health', (req: Request, res: Response) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });

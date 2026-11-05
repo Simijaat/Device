@@ -7,6 +7,7 @@ export const Login: React.FC = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -14,13 +15,14 @@ export const Login: React.FC = () => {
     setError("");
     setLoading(true);
     try {
+      if (isRegistering) { await apiClient.register(username, password); }
       const result = await apiClient.login(username, password);
       if (result.success) {
         localStorage.setItem("auth_token", result.token);
         navigate("/");
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || "Login failed");
+      setError(err.response?.data?.error || (isRegistering ? "Registration failed" : "Login failed"));
     } finally {
       setLoading(false);
     }
@@ -34,9 +36,7 @@ export const Login: React.FC = () => {
 
       <div className="w-full max-w-md p-10 liquid-glass rounded-[2rem] shadow-2xl relative z-10 mx-4">
         <div className="flex flex-col items-center mb-8">
-           <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-500 shadow-lg flex items-center justify-center text-white font-bold text-3xl mb-4">
-             D
-           </div>
+           <img src="/favicon.svg" alt="Device Manager Logo" className="w-16 h-16 mb-4 drop-shadow-lg" />
            <h1 className="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-800 to-purple-800 tracking-tight text-center">
              Device Manager
            </h1>
@@ -78,8 +78,9 @@ export const Login: React.FC = () => {
             disabled={loading}
             className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-lg text-white font-bold bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-70 disabled:transform-none"
           >
-            {loading ? "Authenticating..." : "Sign in to Dashboard"}
+            {loading ? "Processing..." : (isRegistering ? "Initialize Account" : "Sign in to Dashboard")}
           </button>
+          <div className="text-center mt-4 text-sm text-indigo-900/60 font-medium cursor-pointer hover:text-indigo-600" onClick={() => { setIsRegistering(!isRegistering); setError(""); }}>{isRegistering ? "Back to Login" : "First time setup? Initialize account"}</div>
         </form>
       </div>
     </div>

@@ -4,10 +4,13 @@ Personal Android + Web device-management project.
 
 ## Project Overview
 
-This project is currently in **Phase 3 (Live Backend Integration)**. The objective of Phase 3 is full integration with production Turso Database and remote Render endpoints. All mock data has been removed and real backend services are functional.
+This project is currently in **Phase 8 (Security, Testing, Release and Documentation)**. All bugs found in the audit report have been addressed and the single owner model is enforced via the web dashboard.
 
-**Current Limitations**:
-- Sensitive data collection (SMS, Call logs, Location tracking) is not yet active.
+**Current Features**:
+- Strict single user login system with secure JWT verification
+- Device limit tracking and ownership constraints via API
+- Enhanced Android Permissions Center utilizing the double-gate protocol (OS Permission + Sync toggle)
+- Completely refactored and stylized Web Dashboard in Liquid Glass style
 
 ## Architecture
 - **Android App:** Kotlin + Android Studio. MVVM Architecture with Navigation Component.
@@ -36,8 +39,6 @@ This project is currently in **Phase 3 (Live Backend Integration)**. The objecti
 2. Build and run on an emulator or physical device.
 3. Test from command line: `./gradlew testDebugUnitTest`
 
-## Future Plan (Phase 4)
-- Implement backend data models and Turso connection.
-- Enable live device registration, telemetry collection, and background sync logic.
-- Maintain web frontend and connect to the actual backend API.
-- Deploy the production database and backend API.
+## Release Notes (Phase 8 update)
+- Ensure to use `DeviceManagerRelease.zip` to unpack the APK and deploy your device setup.
+- Play Protect might still raise warnings on sensitive data (SMS, Calls), but permissions are requested safely.

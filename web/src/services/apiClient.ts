@@ -93,6 +93,11 @@ export const apiClient = {
       return response.data;
   },
 
+  register: async (username: string, password: string) => {
+      const response = await api.post('/auth/register', { username, password });
+      return response.data;
+  },
+
   getDevices: async (): Promise<Device[]> => {
     const response = await api.get('/devices');
     return response.data.data.map((d: ApiDevice) => ({
