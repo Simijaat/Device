@@ -8,37 +8,69 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Permissions"
+        android:text="Permissions Center"
         android:textSize="24sp"
         android:textStyle="bold"
         android:layout_marginBottom="16dp"/>
 
-    <Button
-        android:id="@+id/btnReqLocation"
+    <!-- Location -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Request Location Permission"
-        android:layout_marginBottom="8dp"/>
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp"
+        android:background="#10000000"
+        android:padding="8dp">
 
-    <Button
-        android:id="@+id/btnReqContacts"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Request Contacts Permission"
-        android:layout_marginBottom="8dp"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Location" android:textStyle="bold" />
+        <TextView android:id="@+id/tvLocationPerm" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Android Permission: Denied" />
+        <Button android:id="@+id/btnReqLocation" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Request Location Permission" />
+        <Switch android:id="@+id/swLocationSync" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Backend Sync: " />
+    </LinearLayout>
 
-    <Button
-        android:id="@+id/btnReqSms"
+    <!-- Contacts -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Request SMS Permission"
-        android:layout_marginBottom="8dp"/>
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp"
+        android:background="#10000000"
+        android:padding="8dp">
 
-    <Button
-        android:id="@+id/btnReqCallLog"
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Contacts" android:textStyle="bold" />
+        <TextView android:id="@+id/tvContactsPerm" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Android Permission: Denied" />
+        <Button android:id="@+id/btnReqContacts" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Request Contacts Permission" />
+        <Switch android:id="@+id/swContactsSync" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Backend Sync: " />
+    </LinearLayout>
+
+    <!-- SMS -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Request Call Log Permission"
-        android:layout_marginBottom="8dp"/>
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp"
+        android:background="#10000000"
+        android:padding="8dp">
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="SMS" android:textStyle="bold" />
+        <TextView android:id="@+id/tvSmsPerm" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Android Permission: Denied" />
+        <Button android:id="@+id/btnReqSms" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Request SMS Permission" />
+        <Switch android:id="@+id/swSmsSync" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Backend Sync: " />
+    </LinearLayout>
+
+    <!-- Call Log -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp"
+        android:background="#10000000"
+        android:padding="8dp">
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Call Log" android:textStyle="bold" />
+        <TextView android:id="@+id/tvCallLogPerm" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Android Permission: Denied" />
+        <Button android:id="@+id/btnReqCallLog" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Request Call Log Permission" />
+        <Switch android:id="@+id/swCallLogSync" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Backend Sync: " />
+    </LinearLayout>
 
 </LinearLayout>

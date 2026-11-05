@@ -1,0 +1,46 @@
+--- web/src/pages/Login.tsx
++++ web/src/pages/Login.tsx
+@@ -7,6 +7,7 @@
+   const [password, setPassword] = useState("");
+   const [error, setError] = useState("");
+   const [loading, setLoading] = useState(false);
++  const [isRegistering, setIsRegistering] = useState(false);
+   const navigate = useNavigate();
+
+   const handleLogin = async (e: React.FormEvent) => {
+@@ -14,12 +15,15 @@
+     setError("");
+     setLoading(true);
+     try {
++      if (isRegistering) {
++        await apiClient.register(username, password);
++      }
+       const result = await apiClient.login(username, password);
+       if (result.success) {
+         localStorage.setItem("auth_token", result.token);
+         navigate("/");
+       }
+     } catch (err: any) {
+-      setError(err.response?.data?.error || "Login failed");
++      setError(err.response?.data?.error || (isRegistering ? "Registration failed" : "Login failed"));
+     } finally {
+       setLoading(false);
+@@ -78,7 +82,16 @@
+             disabled={loading}
+             className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-lg text-white font-bold bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-70 disabled:transform-none"
+           >
+-            {loading ? "Authenticating..." : "Sign in to Dashboard"}
++            {loading ? "Processing..." : (isRegistering ? "Initialize Account" : "Sign in to Dashboard")}
+           </button>
++
++          <div className="text-center mt-4 text-sm text-indigo-900/60 font-medium cursor-pointer hover:text-indigo-600" onClick={() => {
++              setIsRegistering(!isRegistering);
++              setError("");
++          }}>
++              {isRegistering ? "Back to Login" : "First time setup? Initialize account"}
++          </div>
+         </form>
+       </div>
+     </div>
+   );
+ };
