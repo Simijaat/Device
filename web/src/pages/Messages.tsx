@@ -16,7 +16,7 @@ export const Messages: React.FC = () => {
       const data = await apiClient.getMessages();
       setMessages(data);
     } catch (err: any) {
-      console.error("Failed to fetch messages", err);
+      console.warn("Notice: Unable to fetch messages", err?.message || err);
       setError(err.response?.data?.error || err.message || "Failed to load messages.");
     } finally {
       setLoading(false);

@@ -9,8 +9,9 @@ export const getApiBaseUrl = (): string => {
   if (envUrl && envUrl.trim() !== '') {
     return envUrl.endsWith('/') ? envUrl.slice(0, -1) : envUrl;
   }
-  // If in browser dev server without explicit URL, use relative /api which Vite proxies
-  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+  // In the browser, always use relative /api so requests go through the dev server proxy,
+  // avoiding cross-origin CORS blocks (such as on *.run.app)
+  if (typeof window !== 'undefined') {
     return '/api';
   }
   return DEFAULT_PRODUCTION_API;

@@ -67,6 +67,15 @@ function devApiPlugin(): Plugin {
           return next();
         }
 
+        if (req.method === 'OPTIONS') {
+          res.statusCode = 204;
+          res.setHeader('Access-Control-Allow-Origin', '*');
+          res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+          res.setHeader('Access-Control-Allow-Headers', '*');
+          res.end();
+          return;
+        }
+
         const isMockRequested = req.headers['x-mock-mode'] === 'true' || process.env.VITE_USE_MOCK === 'true';
 
         // If NOT explicitly in mock mode, pass to the real backend via proxy
@@ -92,16 +101,34 @@ function devApiPlugin(): Plugin {
               bodyBuffer = Buffer.concat(chunks);
             }
 
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
+
             const response = await fetch(targetUrl.toString(), {
               method: req.method,
               headers,
               body: bodyBuffer,
+              signal: controller.signal
             });
+            clearTimeout(timeoutId);
 
             res.statusCode = response.status;
             response.headers.forEach((value, key) => {
-              res.setHeader(key, value);
+              const lower = key.toLowerCase();
+              if (
+                lower !== 'content-encoding' &&
+                lower !== 'content-length' &&
+                lower !== 'transfer-encoding' &&
+                lower !== 'connection' &&
+                lower !== 'access-control-allow-origin'
+              ) {
+                res.setHeader(key, value);
+              }
             });
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+            res.setHeader('Access-Control-Allow-Headers', '*');
+
             const resData = await response.arrayBuffer();
             res.end(Buffer.from(resData));
             return;
@@ -109,9 +136,10 @@ function devApiPlugin(): Plugin {
             console.warn('[Proxy Warning] Production backend unreachable, returning structured error:', err.message);
             res.statusCode = 502;
             res.setHeader('Content-Type', 'application/json');
+            res.setHeader('Access-Control-Allow-Origin', '*');
             res.end(JSON.stringify({
               success: false,
-              error: `Production backend unreachable (https://backend-ttml.onrender.com). Please verify deployment or switch to isolated Demo Mode. Error: ${err.message}`
+              error: `Production backend unreachable (https://backend-ttml.onrender.com). The remote server may be waking up. Please retry or switch to Demo Mode.`
             }));
             return;
           }

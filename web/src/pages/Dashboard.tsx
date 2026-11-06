@@ -14,11 +14,11 @@ export const Dashboard: React.FC = () => {
       const data = await apiClient.getDevices();
       setDevices(data);
     } catch (err: any) {
-      console.error("Failed to fetch dashboard devices", err);
+      console.warn("Notice: Unable to fetch dashboard devices from backend", err?.message || err);
       setError(
         err.response?.data?.error ||
         err.message ||
-        "Failed to load devices from backend."
+        "Backend service currently unreachable. If the server is booting up, please retry shortly or switch to Demo Mode."
       );
     } finally {
       setLoading(false);
@@ -58,11 +58,28 @@ export const Dashboard: React.FC = () => {
       </header>
 
       {error && (
-        <div className="mb-6 p-4 rounded-2xl bg-red-50/90 border border-red-200 text-red-700 text-xs sm:text-sm backdrop-blur-sm">
-          <div className="font-bold mb-1 flex items-center gap-1.5">
-            <span>⚠️</span> Communication Warning
+        <div className="mb-6 p-4 rounded-2xl bg-amber-50/90 border border-amber-200 text-amber-900 text-xs sm:text-sm backdrop-blur-sm shadow-sm">
+          <div className="font-bold mb-1 flex items-center gap-1.5 text-amber-950">
+            <span>⚠️</span> Backend Connection Notice
           </div>
-          <p>{error}</p>
+          <p className="mb-3">{error}</p>
+          <div className="flex flex-wrap gap-2 items-center">
+            <button
+              onClick={fetchDevices}
+              className="px-3 py-1 rounded-xl bg-amber-200 hover:bg-amber-300 text-amber-950 font-semibold text-xs transition-colors"
+            >
+              🔄 Retry Connection
+            </button>
+            <button
+              onClick={() => {
+                localStorage.setItem('dev_mock_mode', 'true');
+                window.location.reload();
+              }}
+              className="px-3 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors"
+            >
+              ⚡ Switch to Isolated Demo Mode
+            </button>
+          </div>
         </div>
       )}
 

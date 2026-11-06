@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { isMockModeActive, setMockMode } from '../services/apiClient';
 
@@ -7,6 +7,13 @@ export const Layout: React.FC = () => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const mockActive = isMockModeActive();
+
+  useEffect(() => {
+    const token = typeof localStorage !== 'undefined' ? localStorage.getItem("auth_token") : null;
+    if (!token && !mockActive) {
+      navigate("/login", { replace: true });
+    }
+  }, [mockActive, navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem("auth_token");

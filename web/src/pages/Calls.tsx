@@ -12,8 +12,8 @@ export const Calls: React.FC = () => {
       try {
         const data = await apiClient.getCalls();
         setCalls(data);
-      } catch (err) {
-        console.error("Failed to fetch calls", err);
+      } catch (err: any) {
+        console.warn("Notice: Unable to fetch calls", err?.message || err);
       } finally {
         setLoading(false);
       }

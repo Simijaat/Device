@@ -15,7 +15,7 @@ export const Devices: React.FC = () => {
       const data = await apiClient.getDevices();
       setDevices(data);
     } catch (err: any) {
-      console.error("Failed to fetch devices", err);
+      console.warn("Notice: Unable to fetch devices from backend", err?.message || err);
       setError(err.response?.data?.error || err.message || "Failed to load registered devices.");
     } finally {
       setLoading(false);

@@ -11,8 +11,8 @@ export const Location: React.FC = () => {
       try {
         const data = await apiClient.getLocations();
         setLocations(data);
-      } catch (err) {
-        console.error("Failed to fetch locations", err);
+      } catch (err: any) {
+        console.warn("Notice: Unable to fetch locations", err?.message || err);
       } finally {
         setLoading(false);
       }
