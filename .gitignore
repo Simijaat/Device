@@ -42,3 +42,6 @@ backend/server.log
 web/web.log
 web/.env
 DeviceManager.zip
+
+# Keystore
+*.keystore
