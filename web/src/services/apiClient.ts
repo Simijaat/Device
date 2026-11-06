@@ -1,20 +1,50 @@
 import axios from 'axios';
 import type { Device, Message, Call, Location, Contact, InstalledApp, PermissionStatus } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'; // Better fallback for relative path
+// Production backend default with environment override
+export const DEFAULT_PRODUCTION_API = 'https://backend-ttml.onrender.com/api';
 
-const getAuthToken = () => {
-    return localStorage.getItem('auth_token');
+export const getApiBaseUrl = (): string => {
+  const envUrl = import.meta.env.VITE_API_BASE_URL;
+  if (envUrl && envUrl.trim() !== '') {
+    return envUrl.endsWith('/') ? envUrl.slice(0, -1) : envUrl;
+  }
+  // If in browser dev server without explicit URL, use relative /api which Vite proxies
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    return '/api';
+  }
+  return DEFAULT_PRODUCTION_API;
 };
 
-const api = axios.create({
-  baseURL: API_BASE_URL,
-});
+export const isMockModeActive = (): boolean => {
+  if (import.meta.env.VITE_USE_MOCK === 'true') return true;
+  if (typeof localStorage !== 'undefined') {
+    return localStorage.getItem('dev_mock_mode') === 'true';
+  }
+  return false;
+};
+
+export const setMockMode = (enabled: boolean) => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('dev_mock_mode', enabled ? 'true' : 'false');
+    window.location.reload();
+  }
+};
+
+const getAuthToken = () => {
+  return localStorage.getItem('auth_token');
+};
+
+const api = axios.create();
 
 api.interceptors.request.use((config) => {
+  config.baseURL = getApiBaseUrl();
   const token = getAuthToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+  }
+  if (isMockModeActive()) {
+    config.headers['x-mock-mode'] = 'true';
   }
   return config;
 });
@@ -25,109 +55,113 @@ api.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       // Clear token and redirect to login if unauthorized
       localStorage.removeItem('auth_token');
-      window.location.href = '/login';
+      localStorage.removeItem('auth_user');
+      if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
 );
 
-// We need an exact shape matching for API responses to avoid `any`.
 interface ApiDevice {
-    id: string;
-    name: string;
-    model: string;
-    android_version: string;
-    app_version: string;
-    last_seen: string;
-    is_online: number;
-    battery_level: number;
-    is_charging: number;
-    network_type: string;
+  id: string;
+  name: string;
+  model: string;
+  android_version: string;
+  app_version: string;
+  last_seen: string;
+  is_online: number;
+  battery_level: number;
+  is_charging: number;
+  network_type: string;
 }
 
 interface ApiMessage {
-    id: string;
-    device_id: string;
-    sender: string;
-    content: string;
-    type: string;
-    timestamp: string;
+  id: string;
+  device_id: string;
+  sender: string;
+  content: string;
+  type: string;
+  timestamp: string;
 }
 
 interface ApiCall {
-    id: string;
-    device_id: string;
-    number: string;
-    type: string;
-    duration: number;
-    timestamp: string;
+  id: string;
+  device_id: string;
+  number: string;
+  type: string;
+  duration: number;
+  timestamp: string;
 }
 
 interface ApiLocation {
-    id: string;
-    device_id: string;
-    latitude: number;
-    longitude: number;
-    accuracy: number;
-    timestamp: string;
+  id: string;
+  device_id: string;
+  latitude: number;
+  longitude: number;
+  accuracy: number;
+  timestamp: string;
 }
 
 interface ApiContact {
-    id: string;
-    device_id: string;
-    name: string;
-    phone_number: string;
+  id: string;
+  device_id: string;
+  name: string;
+  phone_number: string;
 }
 
 interface ApiApp {
-    id: string;
-    device_id: string;
-    app_name: string;
-    package_name: string;
-    version_name: string;
+  id: string;
+  device_id: string;
+  app_name: string;
+  package_name: string;
+  version_name: string;
 }
 
 export const apiClient = {
   login: async (username: string, password: string) => {
-      const response = await api.post('/auth/login', { username, password });
-      return response.data;
+    const response = await api.post('/auth/login', { username, password });
+    return response.data;
   },
 
   register: async (username: string, password: string) => {
-      const response = await api.post('/auth/register', { username, password });
-      return response.data;
+    const response = await api.post('/auth/register', { username, password });
+    return response.data;
   },
 
   getDevices: async (): Promise<Device[]> => {
     const response = await api.get('/devices');
-    return response.data.data.map((d: ApiDevice) => ({
+    const items = response.data?.data || [];
+    return items.map((d: ApiDevice) => ({
       id: d.id,
       name: d.name,
-      model: d.model,
-      androidVersion: d.android_version,
-      appVersion: d.app_version,
+      model: d.model || 'Unknown Model',
+      androidVersion: d.android_version || 'Android',
+      appVersion: d.app_version || '1.0',
       lastSeen: d.last_seen,
-      isOnline: !!d.is_online,
-      batteryLevel: d.battery_level,
-      isCharging: !!d.is_charging,
-      networkType: d.network_type
+      isOnline: Boolean(d.is_online),
+      batteryLevel: d.battery_level ?? 0,
+      isCharging: Boolean(d.is_charging),
+      networkType: d.network_type || 'Unknown'
     }));
   },
 
   getDevice: async (id: string): Promise<Device | undefined> => {
     const response = await api.get(`/devices/${id}`);
-    const d: ApiDevice = response.data.data;
+    const d: ApiDevice = response.data?.data;
+    if (!d) return undefined;
     return {
       id: d.id,
       name: d.name,
-      model: d.model,
-      androidVersion: d.android_version,
-      appVersion: d.app_version,
+      model: d.model || 'Unknown Model',
+      androidVersion: d.android_version || 'Android',
+      appVersion: d.app_version || '1.0',
       lastSeen: d.last_seen,
-      isOnline: !!d.is_online,
-      batteryLevel: d.battery_level,
-      isCharging: !!d.is_charging,
-      networkType: d.network_type
+      isOnline: Boolean(d.is_online),
+      batteryLevel: d.battery_level ?? 0,
+      isCharging: Boolean(d.is_charging),
+      networkType: d.network_type || 'Unknown'
     };
   },
 
@@ -136,9 +170,10 @@ export const apiClient = {
   },
 
   getMessages: async (deviceId?: string): Promise<Message[]> => {
-    const url = deviceId ? `/messages?deviceId=${deviceId}` : '/messages';
+    const url = deviceId ? `/messages?deviceId=${encodeURIComponent(deviceId)}` : '/messages';
     const response = await api.get(url);
-    return response.data.data.map((m: ApiMessage) => ({
+    const items = response.data?.data || [];
+    return items.map((m: ApiMessage) => ({
       id: m.id,
       deviceId: m.device_id,
       sender: m.sender,
@@ -149,13 +184,14 @@ export const apiClient = {
   },
 
   deleteMessage: async (id: string): Promise<void> => {
-      await api.delete(`/messages/${id}`);
+    await api.delete(`/messages/${id}`);
   },
 
   getCalls: async (deviceId?: string): Promise<Call[]> => {
-    const url = deviceId ? `/calls?deviceId=${deviceId}` : '/calls';
+    const url = deviceId ? `/calls?deviceId=${encodeURIComponent(deviceId)}` : '/calls';
     const response = await api.get(url);
-    return response.data.data.map((c: ApiCall) => ({
+    const items = response.data?.data || [];
+    return items.map((c: ApiCall) => ({
       id: c.id,
       deviceId: c.device_id,
       number: c.number,
@@ -166,22 +202,24 @@ export const apiClient = {
   },
 
   getLocations: async (deviceId?: string): Promise<Location[]> => {
-    const url = deviceId ? `/locations?deviceId=${deviceId}` : '/locations';
+    const url = deviceId ? `/locations?deviceId=${encodeURIComponent(deviceId)}` : '/locations';
     const response = await api.get(url);
-    return response.data.data.map((l: ApiLocation) => ({
+    const items = response.data?.data || [];
+    return items.map((l: ApiLocation) => ({
       id: l.id,
       deviceId: l.device_id,
-      latitude: l.latitude,
-      longitude: l.longitude,
-      accuracy: l.accuracy,
+      latitude: Number(l.latitude),
+      longitude: Number(l.longitude),
+      accuracy: Number(l.accuracy || 0),
       timestamp: l.timestamp
     }));
   },
 
   getContacts: async (deviceId?: string): Promise<Contact[]> => {
-    const url = deviceId ? `/contacts?deviceId=${deviceId}` : '/contacts';
+    const url = deviceId ? `/contacts?deviceId=${encodeURIComponent(deviceId)}` : '/contacts';
     const response = await api.get(url);
-    return response.data.data.map((c: ApiContact) => ({
+    const items = response.data?.data || [];
+    return items.map((c: ApiContact) => ({
       id: c.id,
       deviceId: c.device_id,
       name: c.name,
@@ -190,19 +228,19 @@ export const apiClient = {
   },
 
   getApps: async (deviceId?: string): Promise<InstalledApp[]> => {
-    const url = deviceId ? `/apps?deviceId=${deviceId}` : '/apps';
+    const url = deviceId ? `/apps?deviceId=${encodeURIComponent(deviceId)}` : '/apps';
     const response = await api.get(url);
-    return response.data.data.map((a: ApiApp) => ({
+    const items = response.data?.data || [];
+    return items.map((a: ApiApp) => ({
       id: a.id,
       deviceId: a.device_id,
       appName: a.app_name,
       packageName: a.package_name,
-      versionName: a.version_name
+      versionName: a.version_name || 'Unknown'
     }));
   },
 
   getPermissions: async (_deviceId?: string): Promise<PermissionStatus[]> => {
-    // We don't have a backend implementation for permissions yet, returning empty or fallback.
     return [];
   },
 };

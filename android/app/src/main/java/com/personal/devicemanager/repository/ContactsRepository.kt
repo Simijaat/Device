@@ -21,12 +21,17 @@ class ContactsRepository(
         return contactDao.getAllContacts()
     }
 
-    suspend fun syncContacts() {
-        if (!localState.masterCollectionEnabled || !localState.contactsCollectionEnabled) {
-            return
-        }
+    fun hasValidPermissionAndConsent(): Boolean {
+        val hasPermission = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.READ_CONTACTS
+        ) == PackageManager.PERMISSION_GRANTED
 
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+        return hasPermission && localState.masterCollectionEnabled && localState.contactsCollectionEnabled
+    }
+
+    suspend fun syncContacts() {
+        if (!hasValidPermissionAndConsent()) {
             return
         }
 

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import java.util.UUID
 
 class EncryptedPrefsManager(context: Context) {
     private val masterKey = MasterKey.Builder(context)
@@ -28,5 +29,14 @@ class EncryptedPrefsManager(context: Context) {
 
     fun clearToken() {
         sharedPreferences.edit().remove("auth_token").apply()
+    }
+
+    fun getOrCreateDeviceId(): String {
+        var deviceId = sharedPreferences.getString("device_id", null)
+        if (deviceId == null) {
+            deviceId = UUID.randomUUID().toString()
+            sharedPreferences.edit().putString("device_id", deviceId).apply()
+        }
+        return deviceId
     }
 }

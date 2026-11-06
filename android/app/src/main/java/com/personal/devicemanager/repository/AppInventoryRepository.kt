@@ -1,14 +1,10 @@
 package com.personal.devicemanager.repository
 
 import android.content.Context
-import android.content.pm.ApplicationInfo
-import android.content.pm.PackageManager
 import com.personal.devicemanager.data.AppDao
 import com.personal.devicemanager.data.AppRecord
 import com.personal.devicemanager.data.LocalState
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.withContext
 
 class AppInventoryRepository(
     private val context: Context,
@@ -20,28 +16,9 @@ class AppInventoryRepository(
     }
 
     suspend fun syncApps() {
-        if (!localState.masterCollectionEnabled || !localState.appInventoryCollectionEnabled) {
-            return
-        }
-
-        withContext(Dispatchers.IO) {
-            val pm = context.packageManager
-            val packages = pm.getInstalledPackages(0)
-            val appList = mutableListOf<AppRecord>()
-
-            for (pack in packages) {
-                val appInfo = pack.applicationInfo ?: continue
-                val appName = pm.getApplicationLabel(appInfo).toString()
-                val isSystemApp = (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0
-                val versionName = pack.versionName ?: "Unknown"
-
-                appList.add(AppRecord(pack.packageName, appName, versionName, isSystemApp))
-            }
-
-            if (appList.isNotEmpty()) {
-                appDao.insertAll(appList)
-            }
-        }
+        // App inventory scanning removed to eliminate package visibility probing
+        // and respect user privacy and Play Protect policies.
+        return
     }
 
     suspend fun clearApps() {

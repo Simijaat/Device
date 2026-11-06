@@ -1,0 +1,8 @@
+{
+  "name": "Device Manager",
+  "description": "Personal Android device management dashboard for monitoring device status, location, messages, and calls in real time.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

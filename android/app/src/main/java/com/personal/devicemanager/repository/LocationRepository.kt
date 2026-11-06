@@ -20,19 +20,25 @@ class LocationRepository(
         return locationDao.getLatestLocation()
     }
 
-    suspend fun fetchAndSaveLocation(): Boolean {
-        if (!localState.masterCollectionEnabled || !localState.locationCollectionEnabled) {
-            return false
-        }
+    fun hasValidPermissionAndConsent(): Boolean {
+        val hasPermission = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
 
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        return hasPermission && localState.masterCollectionEnabled && localState.locationCollectionEnabled
+    }
+
+    suspend fun fetchAndSaveLocation(): Boolean {
+        if (!hasValidPermissionAndConsent()) {
             return false
         }
 
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
-        // Try getting last known location from GPS or Network
         var location: Location? = null
         try {
             val isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)

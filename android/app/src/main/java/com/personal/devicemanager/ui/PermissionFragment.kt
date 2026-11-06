@@ -32,8 +32,10 @@ class PermissionFragment : Fragment() {
     private lateinit var tvCallLogPerm: TextView
     private lateinit var swCallLogSync: Switch
 
+    private var isUpdatingUI = false
+
     private val requestPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
             updateUI()
         }
 
@@ -62,7 +64,9 @@ class PermissionFragment : Fragment() {
         swCallLogSync = view.findViewById(R.id.swCallLogSync)
 
         view.findViewById<Button>(R.id.btnReqLocation).setOnClickListener {
-            requestPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
+            requestPermissionLauncher.launch(
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+            )
         }
 
         view.findViewById<Button>(R.id.btnReqContacts).setOnClickListener {
@@ -77,10 +81,68 @@ class PermissionFragment : Fragment() {
             requestPermissionLauncher.launch(arrayOf(Manifest.permission.READ_CALL_LOG))
         }
 
-        swLocationSync.setOnCheckedChangeListener { _, isChecked -> localState.locationCollectionEnabled = isChecked }
-        swContactsSync.setOnCheckedChangeListener { _, isChecked -> localState.contactsCollectionEnabled = isChecked }
-        swSmsSync.setOnCheckedChangeListener { _, isChecked -> localState.smsCollectionEnabled = isChecked }
-        swCallLogSync.setOnCheckedChangeListener { _, isChecked -> localState.callLogCollectionEnabled = isChecked }
+        swLocationSync.setOnCheckedChangeListener { _, isChecked ->
+            if (isUpdatingUI) return@setOnCheckedChangeListener
+            val hasPerm = ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+
+            if (isChecked && !hasPerm) {
+                Toast.makeText(requireContext(), "Grant Location permission first before enabling sync", Toast.LENGTH_SHORT).show()
+                updateUI()
+            } else {
+                localState.locationCollectionEnabled = isChecked
+            }
+        }
+
+        swContactsSync.setOnCheckedChangeListener { _, isChecked ->
+            if (isUpdatingUI) return@setOnCheckedChangeListener
+            val hasPerm = ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.READ_CONTACTS
+            ) == PackageManager.PERMISSION_GRANTED
+
+            if (isChecked && !hasPerm) {
+                Toast.makeText(requireContext(), "Grant Contacts permission first before enabling sync", Toast.LENGTH_SHORT).show()
+                updateUI()
+            } else {
+                localState.contactsCollectionEnabled = isChecked
+            }
+        }
+
+        swSmsSync.setOnCheckedChangeListener { _, isChecked ->
+            if (isUpdatingUI) return@setOnCheckedChangeListener
+            val hasPerm = ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.READ_SMS
+            ) == PackageManager.PERMISSION_GRANTED
+
+            if (isChecked && !hasPerm) {
+                Toast.makeText(requireContext(), "Grant SMS permission first before enabling sync", Toast.LENGTH_SHORT).show()
+                updateUI()
+            } else {
+                localState.smsCollectionEnabled = isChecked
+            }
+        }
+
+        swCallLogSync.setOnCheckedChangeListener { _, isChecked ->
+            if (isUpdatingUI) return@setOnCheckedChangeListener
+            val hasPerm = ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.READ_CALL_LOG
+            ) == PackageManager.PERMISSION_GRANTED
+
+            if (isChecked && !hasPerm) {
+                Toast.makeText(requireContext(), "Grant Call Log permission first before enabling sync", Toast.LENGTH_SHORT).show()
+                updateUI()
+            } else {
+                localState.callLogCollectionEnabled = isChecked
+            }
+        }
 
         updateUI()
     }
@@ -91,21 +153,54 @@ class PermissionFragment : Fragment() {
     }
 
     private fun updateUI() {
-        val locationGranted = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        val contactsGranted = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED
-        val smsGranted = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_SMS) == PackageManager.PERMISSION_GRANTED
-        val callLogGranted = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_CALL_LOG) == PackageManager.PERMISSION_GRANTED
+        if (!isAdded) return
+        isUpdatingUI = true
+
+        val locationGranted = ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        val contactsGranted = ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.READ_CONTACTS
+        ) == PackageManager.PERMISSION_GRANTED
+
+        val smsGranted = ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.READ_SMS
+        ) == PackageManager.PERMISSION_GRANTED
+
+        val callLogGranted = ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.READ_CALL_LOG
+        ) == PackageManager.PERMISSION_GRANTED
+
+        // If permission was revoked, turn off local sync setting to prevent stale collection
+        if (!locationGranted) localState.locationCollectionEnabled = false
+        if (!contactsGranted) localState.contactsCollectionEnabled = false
+        if (!smsGranted) localState.smsCollectionEnabled = false
+        if (!callLogGranted) localState.callLogCollectionEnabled = false
 
         tvLocationPerm.text = "Android Permission: ${if (locationGranted) "Granted" else "Denied"}"
-        swLocationSync.isChecked = localState.locationCollectionEnabled
+        swLocationSync.isChecked = localState.locationCollectionEnabled && locationGranted
+        swLocationSync.isEnabled = locationGranted
 
         tvContactsPerm.text = "Android Permission: ${if (contactsGranted) "Granted" else "Denied"}"
-        swContactsSync.isChecked = localState.contactsCollectionEnabled
+        swContactsSync.isChecked = localState.contactsCollectionEnabled && contactsGranted
+        swContactsSync.isEnabled = contactsGranted
 
         tvSmsPerm.text = "Android Permission: ${if (smsGranted) "Granted" else "Denied"}"
-        swSmsSync.isChecked = localState.smsCollectionEnabled
+        swSmsSync.isChecked = localState.smsCollectionEnabled && smsGranted
+        swSmsSync.isEnabled = smsGranted
 
         tvCallLogPerm.text = "Android Permission: ${if (callLogGranted) "Granted" else "Denied"}"
-        swCallLogSync.isChecked = localState.callLogCollectionEnabled
+        swCallLogSync.isChecked = localState.callLogCollectionEnabled && callLogGranted
+        swCallLogSync.isEnabled = callLogGranted
+
+        isUpdatingUI = false
     }
 }

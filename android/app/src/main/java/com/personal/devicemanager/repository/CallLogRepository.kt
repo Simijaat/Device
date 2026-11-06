@@ -21,12 +21,17 @@ class CallLogRepository(
         return callLogDao.getAllCallLogs()
     }
 
-    suspend fun syncCallLogs() {
-        if (!localState.masterCollectionEnabled || !localState.callLogCollectionEnabled) {
-            return
-        }
+    fun hasValidPermissionAndConsent(): Boolean {
+        val hasPermission = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.READ_CALL_LOG
+        ) == PackageManager.PERMISSION_GRANTED
 
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED) {
+        return hasPermission && localState.masterCollectionEnabled && localState.callLogCollectionEnabled
+    }
+
+    suspend fun syncCallLogs() {
+        if (!hasValidPermissionAndConsent()) {
             return
         }
 
@@ -35,7 +40,7 @@ class CallLogRepository(
             val cursor = context.contentResolver.query(
                 CallLog.Calls.CONTENT_URI,
                 arrayOf(CallLog.Calls._ID, CallLog.Calls.NUMBER, CallLog.Calls.TYPE, CallLog.Calls.DATE, CallLog.Calls.DURATION),
-                null, null, CallLog.Calls.DEFAULT_SORT_ORDER + " LIMIT 500"
+                null, null, CallLog.Calls.DEFAULT_SORT_ORDER + " LIMIT 100"
             )
 
             cursor?.use {

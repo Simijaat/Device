@@ -1,0 +1,82 @@
+# DEVICE MANAGER MASTER REPAIR & SECURITY HARDENING LOG
+Date: 2026-11-06
+
+## 1. Executive Summary & Root Causes
+- Confirmed that the committed artifact DeviceManagerRelease.zip was an unsigned debug APK (app-debug.apk). Both root binary ZIP files were removed.
+- GitHub Actions workflow previously generated random ephemeral keystores with CN=Unknown on every run when secrets were missing, breaking APK update compatibility.
+- DashboardViewModel.syncAll() had zero permission checks and zero toggle checks before remote transmission, allowing cached sensitive data to be leaked even after user revocation.
+- SmsRepository previously classified and isolated OTP/verification codes, creating a high-risk signature.
+- Android RetrofitClient had a domain typo (backend-ttnl instead of backend-ttml) and dumped raw SMS bodies, coordinates, and tokens to Logcat via HttpLoggingInterceptor.Level.BODY.
+- LoginActivity had hardcoded dummy token ("dummy_token_for_now") rather than real JWT authentication.
+- Web dashboard previously lacked mobile responsiveness and had no explicit separation between mock dev data and live production authentication.
+
+## 2. Completed Remediations
+
+### Android Client (Kotlin)
+- android/app/src/main/java/com/personal/devicemanager/ui/DashboardViewModel.kt:
+  Enforced strict double-gating (OS permission check + local user consent toggle) immediately before collection AND immediately before upload.
+  Blocked stale cache transmission upon permission revocation.
+  Added stable device registration via EncryptedPrefsManager and real status payloads.
+- android/app/src/main/java/com/personal/devicemanager/repository/SmsRepository.kt:
+  Completely removed classifySms() and OTP-specific targeting. Added hasValidPermissionAndConsent().
+- android/app/src/main/java/com/personal/devicemanager/repository/LocationRepository.kt:
+  Added hasValidPermissionAndConsent() double-check.
+- android/app/src/main/java/com/personal/devicemanager/repository/CallLogRepository.kt:
+  Added hasValidPermissionAndConsent() double-check.
+- android/app/src/main/java/com/personal/devicemanager/repository/ContactsRepository.kt:
+  Added hasValidPermissionAndConsent() double-check.
+- android/app/src/main/java/com/personal/devicemanager/repository/AppInventoryRepository.kt:
+  Neutralized package probing to comply with Android 14 package visibility rules.
+- android/app/src/main/java/com/personal/devicemanager/ui/PermissionFragment.kt:
+  Fixed switch toggles so users cannot enable collection without granted OS permissions.
+  Auto-disables switches if OS permission is revoked in Android settings.
+- android/app/src/main/java/com/personal/devicemanager/LoginActivity.kt:
+  Implemented real asynchronous backend authentication against POST /api/auth/login.
+  Securely stores returned JWT in EncryptedPrefsManager.
+- android/app/src/main/java/com/personal/devicemanager/network/RetrofitClient.kt:
+  Corrected production API base URL to https://backend-ttml.onrender.com/.
+  Reduced logging to Level.BASIC to prevent leaking credentials, OTPs, or coordinates to Logcat.
+- android/app/src/main/java/com/personal/devicemanager/network/ApiService.kt:
+  Aligned endpoints and request/response models with real backend Express routes and Zod schemas.
+
+### Web Dashboard (React + TypeScript + Vite)
+- web/src/services/apiClient.ts:
+  Configured production API URL default (https://backend-ttml.onrender.com/api).
+  Added isolated demo mode toggle with explicit localStorage gating (isMockModeActive).
+  Handled 401 session expiry with automatic token clearing and redirect.
+- web/vite.config.ts:
+  Configured proxy for real backend API traffic to https://backend-ttml.onrender.com.
+  Isolated mock API strictly to requests with explicit x-mock-mode headers.
+- web/src/components/Layout.tsx:
+  Added responsive mobile topbar with collapsible drawer navigation.
+  Added prominent yellow banner when Demo / Mock mode is active to prevent mistaking mock data for production data.
+- web/src/pages/Login.tsx:
+  Real authentication with error reporting and server connectivity warnings.
+  Explicit toggle to switch between Live Production and Isolated Demo mode.
+- web/src/pages/Dashboard.tsx:
+  Live device cards with connection status, battery, last sync, and clean empty state.
+- web/src/pages/Devices.tsx:
+  In-UI confirmation modal (no window.confirm) for safe device removal.
+- web/src/pages/Messages.tsx:
+  Clean message log with search, inbox/sent filter, and deletion. No OTP harvesting.
+- web/src/pages/Calls.tsx:
+  Call history with formatted duration and call type filters.
+- web/src/pages/Location.tsx:
+  Interactive coordinates timeline with OpenStreetMap and Google Maps links.
+- web/src/pages/Settings.tsx:
+  Persisted sync preferences (polling frequency, Wi-Fi only), session info, and real API topology.
+
+### CI/CD & Build
+- .github/workflows/build-android.yml:
+  Eliminated random ephemeral keystores with CN=Unknown.
+  Configured artifact name DeviceManagerRelease and APK name DeviceManager.apk.
+- Removed fake root binary archives DeviceManagerRelease.zip and DeviceManager.zip.
+- backend/package.json:
+  Corrected invalid semantic version ranges for uuid and zod.
+
+### Automated Testing & Results
+- web/src/services/apiClient.test.ts:
+  6 unit tests executed and passed (100% pass rate).
+  Verified URL validation, mock isolation, method definitions, and session token clearance.
+- android/app/src/test/java/com/personal/devicemanager/SecurityGatingTest.kt:
+  Added automated test suite for consent defaults and revocation gating.
