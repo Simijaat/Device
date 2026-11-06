@@ -23,11 +23,29 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x android/gradlew
 
-    - name: Build with Gradle
+    - name: Run Tests & Lint
+      run: cd android && ./gradlew testDebugUnitTest lint
+
+    - name: Build Debug APK
       run: cd android && ./gradlew assembleDebug
 
-    - name: Upload APK
+    - name: Build Release APK
+      env:
+        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      run: |
+        echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.keystore
+        cd android && ./gradlew assembleRelease
+
+    - name: Upload Debug APK
       uses: actions/upload-artifact@v4
       with:
         name: app-debug
         path: android/app/build/outputs/apk/debug/app-debug.apk
+
+    - name: Upload Release APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-release
+        path: android/app/build/outputs/apk/release/app-release.apk
