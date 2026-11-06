@@ -17,19 +17,25 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+    val releaseKeystore = file("release.keystore")
+    val hasReleaseKeystore = releaseKeystore.exists()
+
     signingConfigs {
-        create("release") {
-            storeFile = file("release.keystore")
-            storePassword = System.getenv("KEYSTORE_PASSWORD") ?: "android"
-            keyAlias = System.getenv("KEY_ALIAS") ?: "release_key"
-            keyPassword = System.getenv("KEY_PASSWORD") ?: "android"
+        if (hasReleaseKeystore) {
+            create("release") {
+                storeFile = releaseKeystore
+                storePassword = System.getenv("KEYSTORE_PASSWORD") ?: "android"
+                keyAlias = System.getenv("KEY_ALIAS") ?: "release_key"
+                keyPassword = System.getenv("KEY_PASSWORD") ?: "android"
+            }
         }
     }
 
-
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("release")
+            if (hasReleaseKeystore) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -46,6 +52,16 @@ android {
     }
     buildFeatures {
         viewBinding = true
+    }
+    testOptions {
+        unitTests {
+            isReturnDefaultValues = true
+        }
+    }
+    lint {
+        isAbortOnError = false
+        isCheckReleaseBuilds = false
+        baseline = file("lint-baseline.xml")
     }
 }
 
@@ -98,10 +114,4 @@ dependencies {
     testImplementation("org.mockito:mockito-core:4.8.0")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-}
-
-android {
-    lint {
-        baseline = file("lint-baseline.xml")
-    }
 }

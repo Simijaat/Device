@@ -1,30 +1,29 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getApiBaseUrl, isMockModeActive, setMockMode } from "../services/apiClient";
 
 export const Settings: React.FC = () => {
   const navigate = useNavigate();
   const [clearedNotice, setClearedNotice] = useState<string | null>(null);
-  const [syncInterval, setSyncInterval] = useState("60");
-  const [wifiOnly, setWifiOnly] = useState(true);
-  const [currentUser, setCurrentUser] = useState<{ id?: string; username?: string } | null>(null);
-  const mockActive = isMockModeActive();
-
-  useEffect(() => {
-    const savedInterval = localStorage.getItem("dashboard_sync_interval") || "60";
-    const savedWifi = localStorage.getItem("dashboard_wifi_only");
-    setSyncInterval(savedInterval);
-    setWifiOnly(savedWifi !== "false");
-
+  const [syncInterval, setSyncInterval] = useState(() => {
+    return typeof localStorage !== "undefined" ? localStorage.getItem("dashboard_sync_interval") || "60" : "60";
+  });
+  const [wifiOnly, setWifiOnly] = useState(() => {
+    return typeof localStorage !== "undefined" ? localStorage.getItem("dashboard_wifi_only") !== "false" : true;
+  });
+  const [currentUser] = useState<{ id?: string; username?: string } | null>(() => {
+    if (typeof localStorage === "undefined") return null;
     const userRaw = localStorage.getItem("auth_user");
     if (userRaw) {
       try {
-        setCurrentUser(JSON.parse(userRaw));
+        return JSON.parse(userRaw);
       } catch {
-        setCurrentUser({ username: "Authorized User" });
+        return { username: "Authorized User" };
       }
     }
-  }, []);
+    return null;
+  });
+  const mockActive = isMockModeActive();
 
   const handleClearSession = () => {
     localStorage.removeItem("auth_token");

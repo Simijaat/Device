@@ -35,8 +35,11 @@ object DeviceInfoUtils {
             e.printStackTrace()
         }
 
-        val batteryStatus: Intent? = IntentFilter(Intent.ACTION_BATTERY_CHANGED).let { ifilter ->
+        val batteryStatus: Intent? = try {
+            val ifilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
             context.registerReceiver(null, ifilter)
+        } catch (e: Exception) {
+            null
         }
         val batteryPercentage = batteryStatus?.let { intent ->
             val level: Int = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
