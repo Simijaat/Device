@@ -2,6 +2,11 @@ CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,
     username TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
+    password_alt_hash TEXT,
+    security_q1 TEXT,
+    security_a1_hash TEXT,
+    security_q2 TEXT,
+    security_a2_hash TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 

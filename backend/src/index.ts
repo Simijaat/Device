@@ -3,6 +3,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
+import bcrypt from 'bcryptjs';
+import { v4 as uuidv4 } from 'uuid';
 import { env } from './config/env';
 import { db } from './config/db';
 import authRoutes from './routes/authRoutes';
@@ -24,6 +26,11 @@ async function ensureSchema() {
       id TEXT PRIMARY KEY,
       username TEXT UNIQUE NOT NULL,
       password_hash TEXT NOT NULL,
+      password_alt_hash TEXT,
+      security_q1 TEXT,
+      security_a1_hash TEXT,
+      security_q2 TEXT,
+      security_a2_hash TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`,
     `CREATE TABLE IF NOT EXISTS devices (
@@ -99,11 +106,42 @@ async function ensureSchema() {
       FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE CASCADE
     )`
   ];
+
+  const alterColumns = [
+    `ALTER TABLE users ADD COLUMN password_alt_hash TEXT`,
+    `ALTER TABLE users ADD COLUMN security_q1 TEXT`,
+    `ALTER TABLE users ADD COLUMN security_a1_hash TEXT`,
+    `ALTER TABLE users ADD COLUMN security_q2 TEXT`,
+    `ALTER TABLE users ADD COLUMN security_a2_hash TEXT`,
+  ];
+
   try {
     for (const sql of statements) {
       await db.execute(sql);
     }
-    console.log('Database schema verified.');
+    for (const alterSql of alterColumns) {
+      try {
+        await db.execute(alterSql);
+      } catch {
+        // Column already exists
+      }
+    }
+
+    // Ensure canonical master user Admin exists with primary (Shivam@9533) and alternate (Shiv@9533) hashes if not yet initialized
+    const existing = await db.execute({
+      sql: 'SELECT * FROM users ORDER BY created_at ASC LIMIT 1',
+      args: [],
+    });
+    if (existing.rows.length === 0) {
+      const primaryHash = await bcrypt.hash('Shivam@9533', 10);
+      const altHash = await bcrypt.hash('Shiv@9533', 10);
+      await db.execute({
+        sql: 'INSERT INTO users (id, username, password_hash, password_alt_hash) VALUES (?, ?, ?, ?)',
+        args: [uuidv4(), 'Admin', primaryHash, altHash],
+      });
+    }
+
+    console.log('Database schema and master user verified.');
   } catch (err) {
     console.error('Database schema verification warning:', err);
   }
@@ -122,7 +160,7 @@ app.use(express.json({ limit: '5mb' }));
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 50,
+  max: 100,
   message: { success: false, error: 'Too many authentication attempts, please try again later.' }
 });
 

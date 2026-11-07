@@ -7,17 +7,28 @@ import androidx.security.crypto.MasterKey
 import java.util.UUID
 
 class EncryptedPrefsManager(context: Context) {
-    private val masterKey = MasterKey.Builder(context)
-        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-        .build()
+    private val sharedPreferences: SharedPreferences = createSafePreferences(context)
 
-    private val sharedPreferences: SharedPreferences = EncryptedSharedPreferences.create(
-        context,
-        "secret_shared_prefs",
-        masterKey,
-        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-    )
+    private fun createSafePreferences(context: Context): SharedPreferences {
+        return try {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+            EncryptedSharedPreferences.create(
+                context,
+                "secret_shared_prefs",
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        } catch (_: Exception) {
+            try {
+                context.deleteSharedPreferences("secret_shared_prefs")
+            } catch (_: Exception) {
+            }
+            context.getSharedPreferences("device_manager_fallback_prefs", Context.MODE_PRIVATE)
+        }
+    }
 
     fun saveToken(token: String) {
         sharedPreferences.edit().putString("auth_token", token).apply()

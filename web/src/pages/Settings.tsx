@@ -1,11 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sliders, Shield, Server, LogOut } from "lucide-react";
-import { getApiBaseUrl, DEFAULT_PRODUCTION_API } from "../services/apiClient";
+import { Sliders, Shield, Server, LogOut, KeyRound, CheckCircle2 } from "lucide-react";
+import { apiClient, getApiBaseUrl, DEFAULT_PRODUCTION_API } from "../services/apiClient";
+import {
+  SECURITY_QUESTIONS,
+  validateSecurityQuestionsSelection,
+} from "../utils/securityQuestions";
 
 export const Settings: React.FC = () => {
   const navigate = useNavigate();
   const [clearedNotice, setClearedNotice] = useState<string | null>(null);
+  const [errorNotice, setErrorNotice] = useState<string | null>(null);
+
   const [syncInterval, setSyncInterval] = useState(() => {
     return typeof localStorage !== "undefined"
       ? localStorage.getItem("dashboard_sync_interval") || "60"
@@ -23,11 +29,46 @@ export const Settings: React.FC = () => {
       try {
         return JSON.parse(userRaw);
       } catch {
-        return { username: "Authorized User" };
+        return { username: "Admin" };
       }
     }
     return null;
   });
+
+  // Security questions state (Pick 2 of 5)
+  const [availableQuestions, setAvailableQuestions] = useState<string[]>([
+    ...SECURITY_QUESTIONS,
+  ]);
+  const [questionsConfigured, setQuestionsConfigured] = useState(false);
+  const [question1, setQuestion1] = useState<string>(SECURITY_QUESTIONS[0]);
+  const [answer1, setAnswer1] = useState("");
+  const [question2, setQuestion2] = useState<string>(SECURITY_QUESTIONS[1]);
+  const [answer2, setAnswer2] = useState("");
+  const [savingQuestions, setSavingQuestions] = useState(false);
+
+  useEffect(() => {
+    apiClient
+      .getAuthStatus()
+      .then((status) => {
+        if (status?.success) {
+          setQuestionsConfigured(status.securityQuestionsConfigured);
+          if (
+            Array.isArray(status.availableQuestions) &&
+            status.availableQuestions.length === 5
+          ) {
+            setAvailableQuestions(status.availableQuestions);
+          }
+          if (
+            Array.isArray(status.configuredQuestions) &&
+            status.configuredQuestions.length === 2
+          ) {
+            setQuestion1(status.configuredQuestions[0]);
+            setQuestion2(status.configuredQuestions[1]);
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleClearSession = () => {
     localStorage.removeItem("auth_token");
@@ -40,10 +81,58 @@ export const Settings: React.FC = () => {
 
   const handleSavePreferences = (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorNotice(null);
     localStorage.setItem("dashboard_sync_interval", syncInterval);
     localStorage.setItem("dashboard_wifi_only", wifiOnly ? "true" : "false");
     setClearedNotice("Sync preferences saved.");
     setTimeout(() => setClearedNotice(null), 3000);
+  };
+
+  const handleSaveSecurityQuestions = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorNotice(null);
+    setClearedNotice(null);
+
+    const validation = validateSecurityQuestionsSelection({
+      question1,
+      answer1,
+      question2,
+      answer2,
+    });
+
+    if (!validation.valid) {
+      setErrorNotice(validation.error || "Please select 2 distinct security questions.");
+      return;
+    }
+
+    setSavingQuestions(true);
+    try {
+      const res = await apiClient.saveSecurityQuestions({
+        username: currentUser?.username || "Admin",
+        question1,
+        answer1,
+        question2,
+        answer2,
+      });
+      if (res?.success) {
+        setQuestionsConfigured(true);
+        setAnswer1("");
+        setAnswer2("");
+        setClearedNotice(
+          "Your 2 Security Questions have been saved! You can now use them on the Login screen to reset your password anytime."
+        );
+      } else {
+        setErrorNotice(res?.error || "Failed to save security questions.");
+      }
+    } catch (err: any) {
+      setErrorNotice(
+        err.response?.data?.error ||
+          err.message ||
+          "Failed to save security questions."
+      );
+    } finally {
+      setSavingQuestions(false);
+    }
   };
 
   return (
@@ -53,17 +142,129 @@ export const Settings: React.FC = () => {
           System Settings
         </h1>
         <p className="text-slate-700 font-semibold text-xs sm:text-sm mt-0.5">
-          Configure synchronization preferences, active session security, and production network topology
+          Configure synchronization preferences, 2-of-5 security questions for password recovery, and active session security
         </p>
       </header>
 
       {clearedNotice && (
-        <div className="mb-6 p-4 rounded-2xl liquid-glass-droplet text-emerald-950 text-xs sm:text-sm font-extrabold">
-          {clearedNotice}
+        <div
+          role="status"
+          className="mb-6 p-4 rounded-2xl liquid-glass-droplet text-emerald-950 text-xs sm:text-sm font-extrabold flex items-center gap-2"
+        >
+          <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
+          <span>{clearedNotice}</span>
+        </div>
+      )}
+
+      {errorNotice && (
+        <div
+          role="alert"
+          className="mb-6 p-4 rounded-2xl bg-red-500/15 border border-red-400/60 text-red-950 text-xs sm:text-sm font-extrabold"
+        >
+          {errorNotice}
         </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Security Questions & Password Recovery Card (2 of 5 Questions) */}
+        <div className="liquid-card lg:col-span-2">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <h2 className="text-lg sm:text-xl font-black text-slate-950 flex items-center gap-2.5">
+              <KeyRound className="w-5 h-5 text-slate-900 stroke-[2.4]" />
+              <span>Password Recovery Security Questions (Select 2 of 5)</span>
+            </h2>
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-extrabold ${
+                questionsConfigured
+                  ? "bg-emerald-500/20 text-emerald-950 border border-emerald-500/40"
+                  : "bg-amber-500/20 text-amber-950 border border-amber-500/40"
+              }`}
+            >
+              {questionsConfigured
+                ? "2 Security Questions Active"
+                : "Not Configured Yet"}
+            </span>
+          </div>
+
+          <p className="text-xs sm:text-sm text-slate-700 font-semibold mb-4">
+            Choose any 2 security questions out of the 5 questions below and enter your secret answers. Direct password overwrite is disabled — answering these 2 questions is required to reset the master password on the login page.
+          </p>
+
+          <form onSubmit={handleSaveSecurityQuestions} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2 p-4 rounded-2xl bg-white/40 border border-white/70">
+                <label
+                  htmlFor="settings-q1"
+                  className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider"
+                >
+                  Security Question 1
+                </label>
+                <select
+                  id="settings-q1"
+                  value={question1}
+                  onChange={(e) => setQuestion1(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-full liquid-glass-input text-xs sm:text-sm font-bold text-slate-950 focus:outline-none"
+                >
+                  {availableQuestions.map((q) => (
+                    <option key={`sq1-${q}`} value={q}>
+                      {q}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  id="settings-a1"
+                  type="text"
+                  value={answer1}
+                  onChange={(e) => setAnswer1(e.target.value)}
+                  placeholder="Enter new answer for Question 1"
+                  className="w-full px-4 py-2.5 rounded-full liquid-glass-input text-xs sm:text-sm font-semibold text-slate-950 placeholder:text-slate-500 focus:outline-none"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2 p-4 rounded-2xl bg-white/40 border border-white/70">
+                <label
+                  htmlFor="settings-q2"
+                  className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider"
+                >
+                  Security Question 2
+                </label>
+                <select
+                  id="settings-q2"
+                  value={question2}
+                  onChange={(e) => setQuestion2(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-full liquid-glass-input text-xs sm:text-sm font-bold text-slate-950 focus:outline-none"
+                >
+                  {availableQuestions.map((q) => (
+                    <option key={`sq2-${q}`} value={q}>
+                      {q}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  id="settings-a2"
+                  type="text"
+                  value={answer2}
+                  onChange={(e) => setAnswer2(e.target.value)}
+                  placeholder="Enter new answer for Question 2"
+                  className="w-full px-4 py-2.5 rounded-full liquid-glass-input text-xs sm:text-sm font-semibold text-slate-950 placeholder:text-slate-500 focus:outline-none"
+                  required
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={savingQuestions}
+              className="glass-button text-xs sm:text-sm"
+            >
+              {savingQuestions
+                ? "Saving Security Questions..."
+                : "Save 2 Security Questions"}
+            </button>
+          </form>
+        </div>
+
         {/* Sync Preferences Card */}
         <div className="liquid-card">
           <h2 className="text-lg sm:text-xl font-black text-slate-950 mb-4 flex items-center gap-2.5">
@@ -118,7 +319,7 @@ export const Settings: React.FC = () => {
           <div className="text-xs sm:text-sm text-slate-700 space-y-1.5 mb-5 font-medium">
             <p>
               <span className="font-extrabold text-slate-950">Authenticated Account:</span>{" "}
-              {currentUser?.username || "Authorized Master User"}
+              {currentUser?.username || "Admin"}
             </p>
             <p>
               <span className="font-extrabold text-slate-950">Session Security:</span>{" "}

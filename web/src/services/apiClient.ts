@@ -117,7 +117,14 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
+    const reqUrl = String(error?.config?.url || '');
+    const isAuthEndpoint =
+      reqUrl.includes('/auth/login') ||
+      reqUrl.includes('/auth/register') ||
+      reqUrl.includes('/auth/reset-password') ||
+      reqUrl.includes('/auth/security-questions');
+
+    if (error.response && error.response.status === 401 && !isAuthEndpoint) {
       localStorage.removeItem('auth_token');
       localStorage.removeItem('auth_user');
       if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
@@ -183,14 +190,63 @@ interface ApiApp {
   version_name: string;
 }
 
+export interface AuthStatusResponse {
+  success: boolean;
+  initialized: boolean;
+  masterUsername: string | null;
+  securityQuestionsConfigured: boolean;
+  configuredQuestions: string[];
+  availableQuestions: string[];
+}
+
 export const apiClient = {
+  getAuthStatus: async (): Promise<AuthStatusResponse> => {
+    const response = await api.get('/auth/status');
+    return response.data;
+  },
+
   login: async (username: string, password: string) => {
     const response = await api.post('/auth/login', { username, password });
     return response.data;
   },
 
-  register: async (username: string, password: string) => {
-    const response = await api.post('/auth/register', { username, password });
+  register: async (
+    username: string,
+    password: string,
+    securityQuestions?: {
+      question1: string;
+      answer1: string;
+      question2: string;
+      answer2: string;
+    }
+  ) => {
+    const response = await api.post('/auth/register', {
+      username,
+      password,
+      ...securityQuestions,
+    });
+    return response.data;
+  },
+
+  saveSecurityQuestions: async (payload: {
+    username?: string;
+    currentPassword?: string;
+    question1: string;
+    answer1: string;
+    question2: string;
+    answer2: string;
+  }) => {
+    const response = await api.post('/auth/security-questions', payload);
+    return response.data;
+  },
+
+  resetPasswordWithQuestions: async (payload: {
+    username: string;
+    answer1: string;
+    answer2: string;
+    newPassword: string;
+  }) => {
+    const response = await api.post('/auth/reset-password', payload);
     return response.data;
   },
 

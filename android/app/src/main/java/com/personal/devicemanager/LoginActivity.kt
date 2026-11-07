@@ -47,18 +47,7 @@ class LoginActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 try {
                     val apiService = RetrofitClient.getApiService(this@LoginActivity)
-                    var response = apiService.login(LoginRequest(user, pass))
-
-                    // If first-time setup where no master user exists yet, try initializing master account then login
-                    if (!response.isSuccessful && response.code() == 401) {
-                        try {
-                            val regRes = apiService.register(LoginRequest(user, pass))
-                            if (regRes.isSuccessful) {
-                                response = apiService.login(LoginRequest(user, pass))
-                            }
-                        } catch (_: Exception) {
-                        }
-                    }
+                    val response = apiService.login(LoginRequest(user, pass))
 
                     if (response.isSuccessful && response.body()?.success == true) {
                         val token = response.body()?.token
