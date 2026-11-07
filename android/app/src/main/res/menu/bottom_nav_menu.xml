@@ -2,14 +2,18 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/dashboardFragment"
-        android:title="Dashboard" />
+        android:icon="@drawable/ic_nav_home"
+        android:title="Home" />
     <item
         android:id="@+id/deviceInfoFragment"
-        android:title="Info" />
+        android:icon="@drawable/ic_nav_info"
+        android:title="Device" />
     <item
         android:id="@+id/permissionFragment"
-        android:title="Permissions" />
+        android:icon="@drawable/ic_nav_shield"
+        android:title="Access" />
     <item
         android:id="@+id/settingsFragment"
+        android:icon="@drawable/ic_nav_settings"
         android:title="Settings" />
 </menu>

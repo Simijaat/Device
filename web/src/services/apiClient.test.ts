@@ -1,6 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-// Node environment localStorage polyfill for testing
 const storageMock = (() => {
   let store: Record<string, string> = {};
   return {
@@ -12,12 +11,18 @@ const storageMock = (() => {
 })();
 Object.defineProperty(globalThis, 'localStorage', { value: storageMock, writable: true });
 
-import { apiClient, DEFAULT_PRODUCTION_API, getApiBaseUrl, isMockModeActive } from './apiClient';
+import {
+  apiClient,
+  DEFAULT_PRODUCTION_API,
+  getApiBaseUrl,
+  recordBatteryReading,
+  getDeviceBatteryHistory
+} from './apiClient';
+import type { Device } from '../types';
 
-describe('Security & API Client Tests', () => {
+describe('Production API Client & Telemetry Persistence Tests', () => {
   beforeEach(() => {
     localStorage.clear();
-    vi.restoreAllMocks();
   });
 
   it('enforces production backend URL hostname (backend-ttml, not ttnl)', () => {
@@ -25,19 +30,32 @@ describe('Security & API Client Tests', () => {
     expect(DEFAULT_PRODUCTION_API).not.toContain('ttnl');
   });
 
-  it('defaults to production endpoint or environment configuration', () => {
+  it('defaults to production endpoint or same-origin proxy', () => {
     const url = getApiBaseUrl();
     expect(url).toBeDefined();
     expect(url.length).toBeGreaterThan(0);
   });
 
-  it('ensures mock mode is isolated and disabled by default', () => {
-    expect(isMockModeActive()).toBe(false);
-  });
+  it('records and retrieves real device battery telemetry readings accurately', () => {
+    const sampleDevice: Device = {
+      id: 'real-device-01',
+      name: 'Galaxy S24',
+      model: 'SM-S921B',
+      androidVersion: 'Android 14',
+      appVersion: '1.0',
+      lastSeen: new Date().toISOString(),
+      isOnline: true,
+      batteryLevel: 82,
+      isCharging: true,
+      networkType: 'WiFi'
+    };
 
-  it('can activate mock mode explicitly through isolated toggle', () => {
-    localStorage.setItem('dev_mock_mode', 'true');
-    expect(isMockModeActive()).toBe(true);
+    recordBatteryReading(sampleDevice);
+    const history = getDeviceBatteryHistory(sampleDevice, 24);
+    expect(history.length).toBe(1);
+    expect(history[0].batteryLevel).toBe(82);
+    expect(history[0].isCharging).toBe(true);
+    expect(history[0].status).toBe('Charging');
   });
 
   it('apiClient methods are defined and properly typed', () => {
@@ -53,11 +71,10 @@ describe('Security & API Client Tests', () => {
     expect(typeof apiClient.deleteMessage).toBe('function');
   });
 
-  it('session tokens are cleared upon explicit logout or 401 response', () => {
+  it('session tokens are cleared upon explicit logout', () => {
     localStorage.setItem('auth_token', 'valid-jwt-token');
     localStorage.setItem('auth_user', JSON.stringify({ username: 'admin' }));
-    
-    // Simulate clearing session
+
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_user');
 

@@ -1,76 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:clipToPadding="false"
+    android:paddingBottom="96dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="20dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Settings"
-            android:textSize="24sp"
+            android:textColor="#0F172A"
+            android:textSize="26sp"
             android:textStyle="bold"
-            android:layout_marginBottom="24dp"/>
-
-        <Switch
-            android:id="@+id/switchMasterCollection"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Master Collection Enabled"
-            android:textSize="16sp"
             android:layout_marginBottom="16dp"/>
 
-        <Switch
-            android:id="@+id/switchLocation"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Collect Location"
-            android:textSize="16sp"
-            android:layout_marginBottom="8dp"/>
+            android:orientation="vertical"
+            android:background="@drawable/bg_liquid_glass_card"
+            android:padding="20dp"
+            android:layout_marginBottom="20dp">
 
-        <Switch
-            android:id="@+id/switchSms"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Collect SMS"
-            android:textSize="16sp"
-            android:layout_marginBottom="8dp"/>
+            <Switch
+                android:id="@+id/switchMasterCollection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Master Collection Enabled"
+                android:textColor="#0F172A"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_marginBottom="16dp"/>
 
-        <Switch
-            android:id="@+id/switchCalls"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Collect Calls"
-            android:textSize="16sp"
-            android:layout_marginBottom="8dp"/>
+            <Switch
+                android:id="@+id/switchLocation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Collect Location"
+                android:textColor="#1E293B"
+                android:textSize="15sp"
+                android:layout_marginBottom="10dp"/>
 
-        <Switch
-            android:id="@+id/switchContacts"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Collect Contacts"
-            android:textSize="16sp"
-            android:layout_marginBottom="8dp"/>
+            <Switch
+                android:id="@+id/switchSms"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Collect SMS"
+                android:textColor="#1E293B"
+                android:textSize="15sp"
+                android:layout_marginBottom="10dp"/>
 
-        <Switch
-            android:id="@+id/switchApps"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Collect App Inventory"
-            android:textSize="16sp"
-            android:layout_marginBottom="24dp"/>
+            <Switch
+                android:id="@+id/switchCalls"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Collect Calls"
+                android:textColor="#1E293B"
+                android:textSize="15sp"
+                android:layout_marginBottom="10dp"/>
+
+            <Switch
+                android:id="@+id/switchContacts"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Collect Contacts"
+                android:textColor="#1E293B"
+                android:textSize="15sp"
+                android:layout_marginBottom="10dp"/>
+
+            <Switch
+                android:id="@+id/switchApps"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Collect App Inventory"
+                android:textColor="#1E293B"
+                android:textSize="15sp"/>
+        </LinearLayout>
 
         <Button
             android:id="@+id/btnClearAll"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="54dp"
             android:text="Clear All Local Data"
-            android:backgroundTint="#d32f2f"
+            android:textAllCaps="false"
+            android:textStyle="bold"
+            android:backgroundTint="#DC2626"
             android:textColor="#ffffff"
             android:layout_marginBottom="16dp"/>
 

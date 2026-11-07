@@ -1,19 +1,28 @@
-import React, { useState, useEffect } from "react";
-import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { isMockModeActive, setMockMode } from '../services/apiClient';
+import React, { useEffect } from "react";
+import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
+import {
+  Home,
+  Smartphone,
+  Send,
+  PhoneCall,
+  Compass,
+  LogOut,
+  ShieldCheck,
+} from "lucide-react";
 
 export const Layout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const mockActive = isMockModeActive();
 
   useEffect(() => {
-    const token = typeof localStorage !== 'undefined' ? localStorage.getItem("auth_token") : null;
-    if (!token && !mockActive) {
+    const token =
+      typeof localStorage !== "undefined"
+        ? localStorage.getItem("auth_token")
+        : null;
+    if (!token) {
       navigate("/login", { replace: true });
     }
-  }, [mockActive, navigate]);
+  }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem("auth_token");
@@ -22,148 +31,125 @@ export const Layout: React.FC = () => {
   };
 
   const navItems = [
-    { path: '/', label: 'Dashboard', icon: '📊' },
-    { path: '/devices', label: 'Devices', icon: '📱' },
-    { path: '/messages', label: 'Messages', icon: '💬' },
-    { path: '/calls', label: 'Calls', icon: '📞' },
-    { path: '/location', label: 'Location', icon: '📍' },
-    { path: '/settings', label: 'Settings', icon: '⚙️' }
+    { path: "/", label: "Home", icon: Home },
+    { path: "/devices", label: "Devices", icon: Smartphone },
+    { path: "/messages", label: "Messages", icon: Send },
+    { path: "/calls", label: "Calls", icon: PhoneCall },
+    { path: "/location", label: "Location", icon: Compass },
   ];
 
   const isActive = (path: string) => location.pathname === path;
+  const isSettingsActive = location.pathname === "/settings";
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-gradient-to-br from-indigo-100 via-purple-50 to-blue-100">
-      {/* Top Banner if in Demo Mode */}
-      {mockActive && (
-        <div className="bg-amber-500/90 backdrop-blur-md text-amber-950 px-4 py-1.5 text-xs font-semibold flex items-center justify-between z-50 shadow-sm border-b border-amber-600/20">
-          <div className="flex items-center gap-2 truncate">
-            <span>⚠️</span>
-            <span className="truncate">DEMO / MOCK DATA MODE ACTIVE — Showing simulated data (not live Turso).</span>
-          </div>
-          <button
-            onClick={() => setMockMode(false)}
-            className="ml-3 px-2 py-0.5 rounded bg-white/70 hover:bg-white text-amber-900 font-bold text-xs whitespace-nowrap transition-colors"
-          >
-            Switch to Live Production
-          </button>
-        </div>
-      )}
+    <div className="flex flex-col h-screen overflow-hidden relative select-none sm:select-auto">
+      {/* Ambient Chromatic Caustic Orbs for Optical Glass Refraction */}
+      <div className="fixed top-[-6rem] left-[8%] w-96 h-96 bg-amber-300/45 rounded-full filter blur-3xl pointer-events-none z-0"></div>
+      <div className="fixed top-[10%] right-[10%] w-96 h-96 bg-rose-400/35 rounded-full filter blur-3xl pointer-events-none z-0"></div>
+      <div className="fixed bottom-[12%] left-[20%] w-96 h-96 bg-cyan-400/35 rounded-full filter blur-3xl pointer-events-none z-0"></div>
 
-      <div className="flex flex-1 overflow-hidden relative">
-        {/* Mobile Top Header (hidden on md and up) */}
-        <div className="md:hidden fixed top-0 left-0 right-0 h-16 liquid-glass z-30 flex items-center justify-between px-4 border-b border-white/50" style={{ top: mockActive ? '28px' : '0' }}>
-          <div className="flex items-center gap-2.5">
-            <img src="/favicon.svg" alt="Logo" className="w-8 h-8 drop-shadow" />
-            <span className="font-bold text-lg text-indigo-900 tracking-tight">Device Manager</span>
-          </div>
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-xl bg-white/60 hover:bg-white/80 text-gray-700 font-bold focus:outline-none"
-            aria-label="Toggle navigation"
-          >
-            {mobileMenuOpen ? '✕' : '☰'}
-          </button>
-        </div>
+      {/* Refractive Color Ribbon Behind Bottom Pill Navigation */}
+      <div
+        className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[90vw] max-w-[500px] h-16 rounded-full pointer-events-none z-20 opacity-75 blur-xl"
+        style={{
+          background:
+            "linear-gradient(90deg, rgba(234,179,8,0.62) 0%, rgba(244,63,94,0.68) 38%, rgba(59,130,246,0.62) 72%, rgba(16,185,129,0.60) 100%)",
+        }}
+      />
 
-        {/* Mobile Slide-down / Drawer Menu */}
-        {mobileMenuOpen && (
-          <div
-            className="md:hidden fixed inset-0 z-40 bg-black/30 backdrop-blur-sm"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            <div
-              className="w-64 h-full liquid-glass p-5 pt-20 flex flex-col shadow-2xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <ul className="space-y-2 flex-1">
-                {navItems.map((item) => (
-                  <li key={item.path}>
-                    <Link
-                      to={item.path}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={`flex items-center gap-3 p-3 rounded-2xl transition-all font-medium text-sm ${
-                        isActive(item.path)
-                          ? 'bg-white/80 shadow-sm text-indigo-700 font-bold'
-                          : 'text-gray-700 hover:bg-white/40'
-                      }`}
-                    >
-                      <span className="text-base">{item.icon}</span>
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-              <div className="pt-4 border-t border-white/40">
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-2 w-full p-3 rounded-2xl text-red-600 font-bold text-sm hover:bg-red-50/60"
-                >
-                  <span>🚪</span> Logout
-                </button>
-              </div>
+      {/* Sleek Floating Liquid Glass Top Header */}
+      <header className="px-3 sm:px-6 pt-3 sm:pt-4 pb-1 z-30 shrink-0">
+        <div className="max-w-6xl mx-auto liquid-glass rounded-full px-4 sm:px-6 py-2.5 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-3 group">
+            <div className="w-10 h-10 rounded-2xl liquid-glass-droplet p-1 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+              <img
+                src="/favicon.svg"
+                alt="Device Manager Logo"
+                className="w-8 h-8 rounded-xl drop-shadow-sm"
+              />
             </div>
-          </div>
-        )}
-
-        {/* Desktop Sidebar (hidden on mobile, visible on md and up) */}
-        <nav className="hidden md:flex w-64 lg:w-72 m-4 liquid-glass rounded-3xl flex-col overflow-hidden relative z-10 shrink-0">
-          <div className="p-6 pb-2">
-            <div className="flex items-center gap-3 mb-6">
-              <img src="/favicon.svg" alt="Logo" className="w-10 h-10 drop-shadow-md" />
-              <div>
-                <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-700 to-purple-700 tracking-tight leading-tight">
-                  Device Manager
-                </h2>
-                <span className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider">
-                  {mockActive ? "Demo Workspace" : "Production Admin"}
-                </span>
-              </div>
+            <div>
+              <h1 className="text-base sm:text-lg font-black text-slate-950 tracking-tight leading-none">
+                Device Manager
+              </h1>
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-700 uppercase tracking-wider mt-0.5">
+                <ShieldCheck className="w-3 h-3 text-emerald-600 stroke-[2.5]" />
+                Live Production Telemetry
+              </span>
             </div>
-          </div>
+          </Link>
 
-          <div className="flex-1 px-4 overflow-y-auto pb-4">
-            <ul className="space-y-1.5">
-              {navItems.map((item) => (
-                <li key={item.path}>
-                  <Link
-                    to={item.path}
-                    className={`flex items-center gap-3 p-3 rounded-2xl transition-all duration-200 font-medium text-sm ${
-                      isActive(item.path)
-                        ? 'bg-white/70 shadow-sm text-indigo-700 font-bold'
-                        : 'text-gray-600 hover:bg-white/40 hover:text-indigo-600'
-                    }`}
-                  >
-                    <span className="text-lg">{item.icon}</span>
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="p-4 border-t border-white/40 space-y-2">
+          <div className="flex items-center gap-2 sm:gap-3">
             <button
               onClick={handleLogout}
-              className="flex items-center justify-center gap-2 w-full p-2.5 rounded-2xl text-red-500 hover:bg-red-50/50 hover:text-red-600 transition-all font-medium text-sm"
+              className="liquid-glass-droplet px-3.5 py-2 rounded-full text-xs font-extrabold text-slate-900 hover:text-red-700 flex items-center gap-1.5 transition-all active:scale-95"
+              title="Sign out of session"
             >
-              <span>🚪</span> Logout
+              <LogOut className="w-3.5 h-3.5 stroke-[2.4]" />
+              <span className="hidden sm:inline">Sign Out</span>
             </button>
           </div>
-        </nav>
+        </div>
+      </header>
 
-        {/* Main Content Area */}
-        <main className="flex-1 p-3 md:p-4 md:pl-0 pt-20 md:pt-4 overflow-hidden w-full">
-          <div className="h-full w-full overflow-y-auto liquid-glass rounded-3xl relative z-10 shadow-lg">
-            <Outlet />
-          </div>
-        </main>
+      {/* Main Scrollable Content Area (Padded at bottom for Floating Liquid Glass Pill Bar) */}
+      <main className="flex-1 overflow-y-auto px-3 sm:px-6 pt-2 pb-32 relative z-10">
+        <div className="max-w-6xl mx-auto">
+          <Outlet />
+        </div>
+      </main>
 
-        {/* Decorative background blur elements */}
-        <div className="fixed top-0 left-0 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob pointer-events-none"></div>
-        <div className="fixed top-0 right-0 w-96 h-96 bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000 pointer-events-none"></div>
-        <div className="fixed -bottom-32 left-1/2 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000 pointer-events-none"></div>
-      </div>
+      {/* Universal Floating Liquid Glass Pill Bottom Navigation Bar (Matching Attached Reference Images) */}
+      <nav
+        aria-label="Primary Bottom Navigation"
+        className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 w-[94vw] max-w-[520px]"
+      >
+        <div className="liquid-glass-pill-nav rounded-full p-2 flex items-center justify-between gap-1">
+          {navItems.map((item) => {
+            const active = isActive(item.path);
+            const IconComponent = item.icon;
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                aria-label={item.label}
+                title={item.label}
+                className={`relative flex items-center justify-center h-13 sm:h-14 rounded-full transition-all duration-300 ${
+                  active
+                    ? "liquid-glass-droplet px-6 sm:px-8 text-slate-950 scale-[1.02]"
+                    : "px-3.5 sm:px-5 text-slate-900/85 hover:text-slate-950 hover:bg-white/25"
+                }`}
+              >
+                <IconComponent
+                  className="w-6 h-6 transition-transform duration-200"
+                  strokeWidth={active ? 2.6 : 2.2}
+                  fill={active && item.path === "/" ? "currentColor" : "none"}
+                />
+              </Link>
+            );
+          })}
+
+          {/* Right-Most Circular Profile / Settings Avatar Pill (Matching Reference Images) */}
+          <Link
+            to="/settings"
+            aria-label="Settings"
+            title="System Settings"
+            className={`relative flex items-center justify-center h-13 sm:h-14 rounded-full transition-all duration-300 ${
+              isSettingsActive
+                ? "liquid-glass-droplet px-5 sm:px-6 scale-[1.02]"
+                : "px-2.5 sm:px-3.5 hover:bg-white/25"
+            }`}
+          >
+            <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-white/95 shadow-md bg-slate-950 flex items-center justify-center relative">
+              <img
+                src="/favicon.svg"
+                alt="Settings Profile"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </Link>
+        </div>
+      </nav>
     </div>
   );
 };

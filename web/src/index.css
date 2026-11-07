@@ -3,24 +3,107 @@
 @tailwind utilities;
 
 @layer utilities {
+  /* Optical Liquid Glass Surface (Main Cards & Panels) */
   .liquid-glass {
-    @apply bg-white/40 backdrop-blur-xl border border-white/50 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)];
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.56) 0%,
+      rgba(255, 255, 255, 0.28) 50%,
+      rgba(255, 255, 255, 0.44) 100%
+    );
+    backdrop-filter: blur(28px) saturate(195%) contrast(104%);
+    -webkit-backdrop-filter: blur(28px) saturate(195%) contrast(104%);
+    border: 1.5px solid rgba(255, 255, 255, 0.78);
+    box-shadow:
+      0 20px 45px -15px rgba(15, 23, 42, 0.16),
+      inset 0 2px 1.5px 0 rgba(255, 255, 255, 0.92),
+      inset 0 -1.5px 2px 0 rgba(255, 255, 255, 0.48);
   }
-  
-  .liquid-glass-dark {
-    @apply bg-gray-900/50 backdrop-blur-xl border border-gray-700/50 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)];
+
+  /* Floating Pill-Shaped Liquid Glass Navigation Bar (Matching Attached Reference Images) */
+  .liquid-glass-pill-nav {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.44) 0%,
+      rgba(255, 255, 255, 0.20) 48%,
+      rgba(255, 255, 255, 0.36) 100%
+    );
+    backdrop-filter: blur(26px) saturate(210%) contrast(108%);
+    -webkit-backdrop-filter: blur(26px) saturate(210%) contrast(108%);
+    border: 1.6px solid rgba(255, 255, 255, 0.78);
+    box-shadow:
+      0 24px 48px -12px rgba(15, 23, 42, 0.34),
+      0 6px 16px -4px rgba(15, 23, 42, 0.18),
+      inset 0 2.5px 2px 0 rgba(255, 255, 255, 0.94),
+      inset 0 -2px 3px 0 rgba(255, 255, 255, 0.52),
+      inset 3px 0 8px 0 rgba(255, 255, 255, 0.38),
+      inset -3px 0 8px 0 rgba(255, 255, 255, 0.38);
+  }
+
+  /* 3D Raised Convex Glass Droplet Active Tab Lens (Matching Left-Most Active Pill in Reference Images) */
+  .liquid-glass-droplet {
+    background: radial-gradient(
+      125% 120% at 30% 18%,
+      rgba(255, 255, 255, 0.78) 0%,
+      rgba(255, 255, 255, 0.28) 55%,
+      rgba(255, 255, 255, 0.52) 100%
+    );
+    backdrop-filter: blur(18px) saturate(200%) brightness(106%);
+    -webkit-backdrop-filter: blur(18px) saturate(200%) brightness(106%);
+    border: 1.6px solid rgba(255, 255, 255, 0.92);
+    box-shadow:
+      0 8px 20px -4px rgba(15, 23, 42, 0.24),
+      0 2px 6px 0 rgba(15, 23, 42, 0.12),
+      inset 0 2.5px 2.5px 0 rgba(255, 255, 255, 0.98),
+      inset 0 -2.5px 3.5px 0 rgba(15, 23, 42, 0.14),
+      inset 0 0 12px 0 rgba(255, 255, 255, 0.58);
+  }
+
+  .liquid-glass-input {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.65) 0%,
+      rgba(255, 255, 255, 0.38) 100%
+    );
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1.5px solid rgba(255, 255, 255, 0.85);
+    box-shadow:
+      0 4px 14px -3px rgba(15, 23, 42, 0.08),
+      inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.92);
   }
 
   .liquid-card {
-    @apply liquid-glass rounded-2xl p-6 transition-all duration-300 hover:bg-white/50 hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.1)];
+    @apply liquid-glass rounded-[1.75rem] p-6 transition-all duration-300;
   }
-  
+
+  .liquid-card:hover {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.68) 0%,
+      rgba(255, 255, 255, 0.38) 50%,
+      rgba(255, 255, 255, 0.54) 100%
+    );
+    box-shadow:
+      0 24px 52px -14px rgba(15, 23, 42, 0.20),
+      inset 0 2px 2px 0 rgba(255, 255, 255, 0.96),
+      inset 0 -2px 2.5px 0 rgba(255, 255, 255, 0.55);
+  }
+
   .glass-button {
-    @apply bg-white/30 hover:bg-white/50 backdrop-blur-md border border-white/40 shadow-sm text-gray-800 font-medium py-2 px-4 rounded-xl transition-all duration-300;
+    @apply liquid-glass-droplet text-slate-900 font-bold py-2.5 px-5 rounded-full transition-all duration-200 active:scale-95;
   }
 }
 
 body {
-  @apply bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen text-gray-800 antialiased;
+  background:
+    radial-gradient(circle at 14% 18%, rgba(250, 204, 21, 0.34) 0%, transparent 42%),
+    radial-gradient(circle at 52% 12%, rgba(244, 63, 94, 0.28) 0%, transparent 46%),
+    radial-gradient(circle at 86% 24%, rgba(56, 189, 248, 0.36) 0%, transparent 45%),
+    radial-gradient(circle at 22% 88%, rgba(234, 179, 8, 0.32) 0%, transparent 45%),
+    radial-gradient(circle at 50% 92%, rgba(244, 63, 94, 0.32) 0%, transparent 42%),
+    radial-gradient(circle at 82% 88%, rgba(16, 185, 129, 0.30) 0%, transparent 45%),
+    linear-gradient(135deg, #EEF2FF 0%, #FDF2F8 48%, #ECFEFF 100%);
   background-attachment: fixed;
+  @apply min-h-screen text-slate-900 antialiased;
 }

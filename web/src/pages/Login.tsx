@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { apiClient, isMockModeActive, setMockMode, DEFAULT_PRODUCTION_API } from "../services/apiClient";
+import { ShieldCheck, Lock, User, ArrowRight } from "lucide-react";
+import { apiClient, DEFAULT_PRODUCTION_API } from "../services/apiClient";
 
 export const Login: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -8,7 +9,6 @@ export const Login: React.FC = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
-  const mockActive = isMockModeActive();
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -33,7 +33,7 @@ export const Login: React.FC = () => {
       if (serverMsg) {
         setError(serverMsg);
       } else if (err.code === "ERR_NETWORK" || err.message?.includes("Network Error")) {
-        setError(`Cannot reach backend at ${DEFAULT_PRODUCTION_API}. If the remote Render server is booting or sleeping, please retry in a moment, or use Demo Mode for offline preview.`);
+        setError(`Cannot reach production backend (${DEFAULT_PRODUCTION_API}). If the Render server is waking up, please wait a few seconds and try again.`);
       } else {
         setError(err.message || (isRegistering ? "Registration failed" : "Login failed"));
       }
@@ -43,82 +43,96 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen items-center justify-center bg-gradient-to-br from-indigo-100 via-purple-50 to-blue-100 overflow-hidden relative">
-      <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-2xl opacity-40 animate-blob pointer-events-none"></div>
-      <div className="absolute top-1/3 right-1/4 w-72 h-72 bg-indigo-300 rounded-full mix-blend-multiply filter blur-2xl opacity-40 animate-blob animation-delay-2000 pointer-events-none"></div>
-      <div className="absolute bottom-1/4 left-1/2 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-2xl opacity-40 animate-blob animation-delay-4000 pointer-events-none"></div>
+    <div className="flex min-h-screen items-center justify-center overflow-hidden relative px-4 py-8">
+      {/* Chromatic Refraction Backdrop Orbs */}
+      <div className="absolute top-[15%] left-[18%] w-80 h-80 bg-amber-300/50 rounded-full filter blur-3xl pointer-events-none"></div>
+      <div className="absolute top-[25%] right-[18%] w-80 h-80 bg-rose-400/45 rounded-full filter blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-[18%] left-[35%] w-80 h-80 bg-cyan-400/45 rounded-full filter blur-3xl pointer-events-none"></div>
 
-      <div className="w-full max-w-md p-8 sm:p-10 liquid-glass rounded-[2rem] shadow-2xl relative z-10 mx-4">
-        <div className="flex flex-col items-center mb-6">
-          <img src="/favicon.svg" alt="Device Manager Logo" className="w-16 h-16 mb-4 drop-shadow-lg" />
-          <h1 className="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-800 to-purple-800 tracking-tight text-center">
+      <div className="w-full max-w-md p-8 sm:p-10 liquid-glass rounded-[2.25rem] relative z-10">
+        <div className="flex flex-col items-center mb-7">
+          <div className="w-20 h-20 rounded-3xl liquid-glass-droplet p-2 flex items-center justify-center mb-4">
+            <img src="/favicon.svg" alt="Device Manager Logo" className="w-16 h-16 rounded-2xl drop-shadow-md" />
+          </div>
+          <h1 className="text-3xl font-black text-slate-950 tracking-tight text-center">
             Device Manager
           </h1>
-          <p className="text-xs font-semibold text-indigo-900/60 mt-1 uppercase tracking-wider">
-            {mockActive ? "⚠️ Isolated Demo Mode" : "🔒 Live Production Authentication"}
-          </p>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full liquid-glass-droplet mt-2">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-700 stroke-[2.5]" />
+            <span className="text-[11px] font-extrabold text-slate-900 uppercase tracking-wider">
+              Live Production Authentication
+            </span>
+          </div>
         </div>
 
-        {mockActive && (
-          <div className="mb-5 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-medium text-center">
-            <strong>Demo Mode Active:</strong> Simulating in-memory preview. Data does not affect live Turso database.
-          </div>
-        )}
-
         {error && (
-          <div className="mb-6 p-4 rounded-xl bg-red-50/90 border border-red-200 text-red-600 text-xs sm:text-sm font-medium text-center backdrop-blur-sm">
+          <div className="mb-6 p-4 rounded-2xl bg-red-500/15 border border-red-400/60 text-red-950 text-xs sm:text-sm font-bold text-center backdrop-blur-md">
             {error}
           </div>
         )}
 
         <form onSubmit={handleLogin} className="space-y-5">
-          <div className="space-y-1">
-            <label className="block text-sm font-semibold text-indigo-900/70 pl-1">Username</label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full rounded-xl bg-white/70 border border-white/80 focus:border-indigo-400 focus:ring focus:ring-indigo-200/50 shadow-sm p-3 transition-all backdrop-blur-md text-gray-800 text-sm"
-              placeholder="Enter your username"
-              required
-            />
+          <div className="space-y-1.5">
+            <label className="block text-xs font-extrabold text-slate-800 uppercase tracking-wider pl-2">
+              Username
+            </label>
+            <div className="relative">
+              <User className="w-4 h-4 text-slate-700 absolute left-4 top-1/2 -translate-y-1/2 stroke-[2.3] z-10 pointer-events-none" />
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full rounded-full liquid-glass-input pl-11 pr-4 py-3.5 text-slate-950 font-semibold text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
+                placeholder="Enter master username"
+                required
+              />
+            </div>
           </div>
 
-          <div className="space-y-1">
-            <label className="block text-sm font-semibold text-indigo-900/70 pl-1">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-xl bg-white/70 border border-white/80 focus:border-indigo-400 focus:ring focus:ring-indigo-200/50 shadow-sm p-3 transition-all backdrop-blur-md text-gray-800 text-sm"
-              placeholder="••••••••"
-              required
-            />
+          <div className="space-y-1.5">
+            <label className="block text-xs font-extrabold text-slate-800 uppercase tracking-wider pl-2">
+              Password
+            </label>
+            <div className="relative">
+              <Lock className="w-4 h-4 text-slate-700 absolute left-4 top-1/2 -translate-y-1/2 stroke-[2.3] z-10 pointer-events-none" />
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded-full liquid-glass-input pl-11 pr-4 py-3.5 text-slate-950 font-semibold text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
+                placeholder="••••••••"
+                required
+              />
+            </div>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-lg text-white font-bold bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 focus:outline-none transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-70 disabled:transform-none"
+            className="w-full flex justify-center items-center gap-2 py-3.5 px-6 rounded-full liquid-glass-droplet text-slate-950 font-black text-sm hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-60"
           >
-            {loading ? "Connecting..." : (isRegistering ? "Initialize Master Account" : "Sign in to Dashboard")}
+            <span>
+              {loading
+                ? "Authenticating with Backend..."
+                : isRegistering
+                ? "Initialize Master Account"
+                : "Sign In to Dashboard"}
+            </span>
+            <ArrowRight className="w-4 h-4 stroke-[2.6]" />
           </button>
 
-          <div className="flex flex-col items-center gap-2 pt-2 text-xs">
+          <div className="flex flex-col items-center pt-2 text-xs">
             <button
               type="button"
-              className="text-indigo-900/70 font-semibold hover:text-indigo-600 underline"
-              onClick={() => { setIsRegistering(!isRegistering); setError(""); }}
+              className="text-slate-800 font-bold hover:text-slate-950 underline underline-offset-4"
+              onClick={() => {
+                setIsRegistering(!isRegistering);
+                setError("");
+              }}
             >
-              {isRegistering ? "Already initialized? Sign In" : "First time setup? Initialize master account"}
-            </button>
-
-            <button
-              type="button"
-              className="text-gray-500 hover:text-gray-700 pt-2"
-              onClick={() => setMockMode(!mockActive)}
-            >
-              {mockActive ? "Switch to Live Production Server" : "Switch to Isolated Demo Mode"}
+              {isRegistering
+                ? "Already initialized? Sign In"
+                : "First time setup? Initialize master account"}
             </button>
           </div>
         </form>

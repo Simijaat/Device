@@ -128,7 +128,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                         apiService.uploadContacts(
                             IngestContactsPayload(
                                 device_id = deviceId,
-                                contacts = contacts.map { ContactUploadItem(it.name, it.phoneNumber) }
+                                contacts = contacts.map { ContactUploadItem(it.name, it.phoneNumbers) }
                             )
                         )
                     } catch (e: Exception) {
@@ -176,7 +176,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                             IngestCallsPayload(
                                 device_id = deviceId,
                                 calls = callList.map {
-                                    val callType = when (it.type) {
+                                    val callType = when (it.callType) {
                                         1 -> "incoming"
                                         2 -> "outgoing"
                                         3 -> "missed"

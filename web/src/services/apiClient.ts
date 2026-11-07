@@ -1,38 +1,105 @@
 import axios from 'axios';
-import type { Device, Message, Call, Location, Contact, InstalledApp, PermissionStatus } from '../types';
+import type { Device, Message, Call, Location, Contact, InstalledApp, PermissionStatus, BatteryDataPoint } from '../types';
 
 // Production backend default with environment override
 export const DEFAULT_PRODUCTION_API = 'https://backend-ttml.onrender.com/api';
 
 export const getApiBaseUrl = (): string => {
+  if (typeof window !== 'undefined' && window.location.hostname !== 'frontend-4swe.onrender.com') {
+    return '/api';
+  }
   const envUrl = import.meta.env.VITE_API_BASE_URL;
   if (envUrl && envUrl.trim() !== '') {
-    return envUrl.endsWith('/') ? envUrl.slice(0, -1) : envUrl;
-  }
-  // In the browser, always use relative /api so requests go through the dev server proxy,
-  // avoiding cross-origin CORS blocks (such as on *.run.app)
-  if (typeof window !== 'undefined') {
-    return '/api';
+    const clean = envUrl.trim().replace(/\/+$/, '');
+    return clean.endsWith('/api') ? clean : `${clean}/api`;
   }
   return DEFAULT_PRODUCTION_API;
 };
 
-export const isMockModeActive = (): boolean => {
-  if (import.meta.env.VITE_USE_MOCK === 'true') return true;
-  if (typeof localStorage !== 'undefined') {
-    return localStorage.getItem('dev_mock_mode') === 'true';
+const BATTERY_HISTORY_STORAGE_PREFIX = 'real_battery_telemetry_';
+
+export const recordBatteryReading = (device: Device): void => {
+  if (typeof localStorage === 'undefined' || !device || !device.id) return;
+  try {
+    const key = `${BATTERY_HISTORY_STORAGE_PREFIX}${device.id}`;
+    const existingRaw = localStorage.getItem(key);
+    const existing: BatteryDataPoint[] = existingRaw ? JSON.parse(existingRaw) : [];
+    const timestampIso = device.lastSeen
+      ? new Date(device.lastSeen).toISOString()
+      : new Date().toISOString();
+    const pointDate = new Date(timestampIso);
+    const level = Math.max(0, Math.min(100, Math.round(device.batteryLevel ?? 0)));
+    const isCharging = Boolean(device.isCharging);
+
+    const newPoint: BatteryDataPoint = {
+      timestamp: timestampIso,
+      timeLabel: pointDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      batteryLevel: level,
+      isCharging,
+      status: level >= 99 && isCharging ? 'Full' : isCharging ? 'Charging' : 'Discharging',
+    };
+
+    // Deduplicate if the latest recorded entry has the exact same timestamp or is within 1 minute with identical level
+    const lastEntry = existing[existing.length - 1];
+    if (
+      !lastEntry ||
+      (lastEntry.timestamp !== newPoint.timestamp &&
+        (Math.abs(new Date(newPoint.timestamp).getTime() - new Date(lastEntry.timestamp).getTime()) > 60_000 ||
+          lastEntry.batteryLevel !== newPoint.batteryLevel ||
+          lastEntry.isCharging !== newPoint.isCharging))
+    ) {
+      const updated = [...existing, newPoint].slice(-96); // keep up to 96 real readings
+      localStorage.setItem(key, JSON.stringify(updated));
+    }
+  } catch {
+    // Ignore storage quota errors
   }
-  return false;
 };
 
-export const setMockMode = (enabled: boolean) => {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('dev_mock_mode', enabled ? 'true' : 'false');
-    window.location.reload();
+export const getDeviceBatteryHistory = (device: Device, hoursWindow = 24): BatteryDataPoint[] => {
+  if (!device || !device.id) return [];
+  const cutoffMs = Date.now() - hoursWindow * 3600 * 1000;
+  let stored: BatteryDataPoint[] = [];
+
+  if (typeof localStorage !== 'undefined') {
+    try {
+      const raw = localStorage.getItem(`${BATTERY_HISTORY_STORAGE_PREFIX}${device.id}`);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          stored = parsed.filter((pt: BatteryDataPoint) => {
+            const t = new Date(pt.timestamp).getTime();
+            return !Number.isNaN(t) && t >= cutoffMs;
+          });
+        }
+      }
+    } catch {
+      stored = [];
+    }
   }
+
+  const liveTimestamp = device.lastSeen
+    ? new Date(device.lastSeen).toISOString()
+    : new Date().toISOString();
+  const liveLevel = Math.max(0, Math.min(100, Math.round(device.batteryLevel ?? 0)));
+  const liveCharging = Boolean(device.isCharging);
+  const livePoint: BatteryDataPoint = {
+    timestamp: liveTimestamp,
+    timeLabel: new Date(liveTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    batteryLevel: liveLevel,
+    isCharging: liveCharging,
+    status: liveLevel >= 99 && liveCharging ? 'Full' : liveCharging ? 'Charging' : 'Discharging',
+  };
+
+  if (stored.length === 0) {
+    return [livePoint];
+  }
+
+  return stored;
 };
 
 const getAuthToken = () => {
+  if (typeof localStorage === 'undefined') return null;
   return localStorage.getItem('auth_token');
 };
 
@@ -44,9 +111,6 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  if (isMockModeActive()) {
-    config.headers['x-mock-mode'] = 'true';
-  }
   return config;
 });
 
@@ -54,7 +118,6 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Clear token and redirect to login if unauthorized
       localStorage.removeItem('auth_token');
       localStorage.removeItem('auth_user');
       if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
@@ -134,7 +197,7 @@ export const apiClient = {
   getDevices: async (): Promise<Device[]> => {
     const response = await api.get('/devices');
     const items = response.data?.data || [];
-    return items.map((d: ApiDevice) => ({
+    const mapped: Device[] = items.map((d: ApiDevice) => ({
       id: d.id,
       name: d.name,
       model: d.model || 'Unknown Model',
@@ -146,13 +209,15 @@ export const apiClient = {
       isCharging: Boolean(d.is_charging),
       networkType: d.network_type || 'Unknown'
     }));
+    mapped.forEach(recordBatteryReading);
+    return mapped;
   },
 
   getDevice: async (id: string): Promise<Device | undefined> => {
     const response = await api.get(`/devices/${id}`);
     const d: ApiDevice = response.data?.data;
     if (!d) return undefined;
-    return {
+    const device: Device = {
       id: d.id,
       name: d.name,
       model: d.model || 'Unknown Model',
@@ -164,6 +229,8 @@ export const apiClient = {
       isCharging: Boolean(d.is_charging),
       networkType: d.network_type || 'Unknown'
     };
+    recordBatteryReading(device);
+    return device;
   },
 
   deleteDevice: async (id: string): Promise<void> => {

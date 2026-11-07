@@ -1,106 +1,111 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%" fill="none">
   <defs>
-    <!-- Dark Cosmic Backdrop Gradient -->
-    <linearGradient id="bgGrad" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#070B14"/>
-      <stop offset="50%" stop-color="#0F172A"/>
-      <stop offset="100%" stop-color="#050811"/>
+    <!-- Vivid Prismatic Liquid Mesh Background -->
+    <linearGradient id="bgMesh" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#060B19"/>
+      <stop offset="45%" stop-color="#111827"/>
+      <stop offset="100%" stop-color="#090D16"/>
     </linearGradient>
 
-    <!-- Top Cyan Aurora Glow -->
-    <radialGradient id="auroraCyan" cx="20" cy="20" r="70" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#00F2FE" stop-opacity="0.6"/>
-      <stop offset="50%" stop-color="#0284C7" stop-opacity="0.25"/>
-      <stop offset="100%" stop-color="#0284C7" stop-opacity="0"/>
+    <!-- Iridescent Chromatic Aura 1 (Cyan-Teal) -->
+    <radialGradient id="causticCyan" cx="28" cy="24" r="76" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#00F5D4" stop-opacity="0.85"/>
+      <stop offset="45%" stop-color="#00BBF9" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#00BBF9" stop-opacity="0"/>
     </radialGradient>
 
-    <!-- Bottom Violet Aurora Glow -->
-    <radialGradient id="auroraViolet" cx="108" cy="108" r="75" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#A855F7" stop-opacity="0.6"/>
-      <stop offset="55%" stop-color="#6366F1" stop-opacity="0.25"/>
-      <stop offset="100%" stop-color="#6366F1" stop-opacity="0"/>
+    <!-- Iridescent Chromatic Aura 2 (Magenta-Coral-Violet) -->
+    <radialGradient id="causticMagenta" cx="102" cy="100" r="82" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FF2A85" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#7B2CBF" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#4361EE" stop-opacity="0"/>
     </radialGradient>
 
-    <!-- Glass Shield Gradient -->
-    <linearGradient id="glassShieldGrad" x1="24" y1="20" x2="104" y2="108" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.32"/>
-      <stop offset="30%" stop-color="#38BDF8" stop-opacity="0.16"/>
-      <stop offset="70%" stop-color="#818CF8" stop-opacity="0.10"/>
-      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.20"/>
+    <!-- Warm Gold-Amber Caustic Refraction -->
+    <radialGradient id="causticGold" cx="24" cy="104" r="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FEE440" stop-opacity="0.65"/>
+      <stop offset="55%" stop-color="#F15BB5" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#F15BB5" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Outer 3D Liquid Glass Capsule Fill -->
+    <linearGradient id="liquidLensFill" x1="20" y1="16" x2="108" y2="112" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.52"/>
+      <stop offset="35%" stop-color="#E0F2FE" stop-opacity="0.22"/>
+      <stop offset="70%" stop-color="#F3E8FF" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.40"/>
     </linearGradient>
 
-    <!-- Glass Border / Refractive Rim -->
-    <linearGradient id="glassRimGrad" x1="24" y1="20" x2="104" y2="108" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.9"/>
-      <stop offset="35%" stop-color="#38BDF8" stop-opacity="0.6"/>
-      <stop offset="75%" stop-color="#C084FC" stop-opacity="0.3"/>
-      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.8"/>
+    <!-- Specular Glass Rim Stroke -->
+    <linearGradient id="liquidRim" x1="18" y1="14" x2="110" y2="114" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.98"/>
+      <stop offset="30%" stop-color="#7DD3FC" stop-opacity="0.75"/>
+      <stop offset="68%" stop-color="#F472B6" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.92"/>
     </linearGradient>
 
-    <!-- Specular Highlight Sheen -->
-    <linearGradient id="specularSheen" x1="28" y1="20" x2="80" y2="70" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.55"/>
-      <stop offset="45%" stop-color="#FFFFFF" stop-opacity="0.12"/>
+    <!-- Top Convex Droplet Glare -->
+    <linearGradient id="dropletGlare" x1="30" y1="18" x2="76" y2="66" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.78"/>
+      <stop offset="45%" stop-color="#FFFFFF" stop-opacity="0.22"/>
       <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
     </linearGradient>
 
-    <!-- Device Frame Gradient -->
-    <linearGradient id="phoneFrameGrad" x1="42" y1="32" x2="86" y2="96" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95"/>
-      <stop offset="40%" stop-color="#38BDF8" stop-opacity="0.6"/>
-      <stop offset="75%" stop-color="#A855F7" stop-opacity="0.6"/>
-      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.85"/>
-    </linearGradient>
-
-    <!-- Holographic Core Orb -->
-    <radialGradient id="coreOrb" cx="64" cy="62" r="8" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#FFFFFF"/>
-      <stop offset="45%" stop-color="#38BDF8"/>
-      <stop offset="90%" stop-color="#0284C7"/>
-      <stop offset="100%" stop-color="#0369A1"/>
+    <!-- Inner Convex Glass Droplet Pill -->
+    <radialGradient id="innerDroplet" cx="52" cy="46" r="42" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.72"/>
+      <stop offset="55%" stop-color="#38BDF8" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.48"/>
     </radialGradient>
 
-    <!-- Glass Blur Filter -->
-    <filter id="glassBlur" x="-10%" y="-10%" width="120%" height="120%">
-      <feGaussianBlur stdDeviation="3" result="blur"/>
-      <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7"/>
-    </filter>
+    <!-- Core Quantum Telemetry Sphere -->
+    <radialGradient id="quantumCore" cx="61" cy="56" r="14" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="40%" stop-color="#00F5D4"/>
+      <stop offset="78%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#7209B7"/>
+    </radialGradient>
   </defs>
 
-  <!-- Base Rounded Container -->
-  <rect width="128" height="128" rx="28" fill="url(#bgGrad)"/>
-  
-  <!-- Aurora Underglows -->
-  <circle cx="20" cy="20" r="70" fill="url(#auroraCyan)"/>
-  <circle cx="108" cy="108" r="75" fill="url(#auroraViolet)"/>
+  <!-- Squircle App Icon Base -->
+  <rect width="128" height="128" rx="32" fill="url(#bgMesh)"/>
 
-  <!-- Liquid Glass Outer Shield -->
-  <rect x="24" y="18" width="80" height="92" rx="20" fill="url(#glassShieldGrad)" stroke="url(#glassRimGrad)" stroke-width="1.8"/>
+  <!-- Vivid Chromatic Caustics Underneath the Glass -->
+  <circle cx="28" cy="24" r="76" fill="url(#causticCyan)"/>
+  <circle cx="102" cy="100" r="82" fill="url(#causticMagenta)"/>
+  <circle cx="24" cy="104" r="64" fill="url(#causticGold)"/>
 
-  <!-- Diagonal Glass Specular Sheen (Curved Cutout) -->
-  <path d="M26 34 C26 25 32 20 40 20 L88 20 C96 20 102 24 103 28 C85 36 50 52 26 84 Z" fill="url(#specularSheen)"/>
+  <!-- Outer 3D Liquid Glass Lens Shield -->
+  <rect x="20" y="16" width="88" height="96" rx="28" fill="url(#liquidLensFill)" stroke="url(#liquidRim)" stroke-width="2.2"/>
+  <rect x="23" y="19" width="82" height="90" rx="25" stroke="#FFFFFF" stroke-opacity="0.35" stroke-width="1"/>
 
-  <!-- Central Smartphone Body -->
-  <rect x="44" y="30" width="40" height="68" rx="10" fill="#0B132B" fill-opacity="0.75" stroke="url(#phoneFrameGrad)" stroke-width="1.5"/>
+  <!-- Top-Left Liquid Droplet Specular Reflection -->
+  <path d="M23 42 C23 27 32 19 46 19 L82 19 C93 19 101 24 103 31 C82 40 48 54 23 84 Z" fill="url(#dropletGlare)"/>
 
-  <!-- Screen Liquid Caustic Inner Display -->
-  <rect x="47" y="36" width="34" height="52" rx="6" fill="#0369A1" fill-opacity="0.2"/>
+  <!-- Central Device Glass Capsule -->
+  <rect x="40" y="26" width="48" height="76" rx="16" fill="#090D16" fill-opacity="0.58" stroke="url(#liquidRim)" stroke-width="2"/>
 
-  <!-- Top Speaker / Dynamic Island -->
-  <rect x="58" y="32.5" width="12" height="3" rx="1.5" fill="#FFFFFF" fill-opacity="0.9"/>
+  <!-- Inner Convex Liquid Glass Droplet Lens -->
+  <rect x="45" y="34" width="38" height="48" rx="12" fill="url(#innerDroplet)" stroke="#FFFFFF" stroke-opacity="0.7" stroke-width="1.2"/>
 
-  <!-- Status Pulse Waves -->
-  <path d="M54 60 A10 10 0 0 1 74 60" stroke="#38BDF8" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.8"/>
-  <path d="M49 55 A15 15 0 0 1 79 55" stroke="#A855F7" stroke-width="1.4" stroke-linecap="round" fill="none" opacity="0.65"/>
+  <!-- Dynamic Island Capsule -->
+  <rect x="56" y="29.5" width="16" height="3.5" rx="1.75" fill="#FFFFFF" fill-opacity="0.95"/>
 
-  <!-- Core Glowing Telemetry Node -->
-  <circle cx="64" cy="62" r="5" fill="url(#coreOrb)"/>
-  <circle cx="64" cy="62" r="7" stroke="#38BDF8" stroke-width="1" stroke-dasharray="2 2" fill="none" opacity="0.9"/>
+  <!-- Telemetry Signal Arcs -->
+  <path d="M53 56 A11 11 0 0 1 75 56" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
+  <path d="M49 51 A16 16 0 0 1 79 51" stroke="#00F5D4" stroke-width="1.8" stroke-linecap="round" opacity="0.85"/>
 
-  <!-- Home Indicator Bar -->
-  <rect x="56" y="92.5" width="16" height="2" rx="1" fill="#FFFFFF" fill-opacity="0.7"/>
+  <!-- Glowing Quantum Telemetry Orb -->
+  <circle cx="64" cy="59" r="7" fill="url(#quantumCore)"/>
+  <circle cx="62" cy="57" r="2.2" fill="#FFFFFF"/>
 
-  <!-- Specular Prism Sparkles -->
-  <polygon points="96,24 98,29 103,31 98,33 96,38 94,33 89,31 94,29" fill="#FFFFFF"/>
-  <polygon points="32,96 33,99 36,100 33,101 32,104 31,101 28,100 31,99" fill="#38BDF8" opacity="0.9"/>
+  <!-- Miniature Floating Liquid Glass Bottom Pill Bar Inside Device -->
+  <rect x="47" y="87" width="34" height="9" rx="4.5" fill="#FFFFFF" fill-opacity="0.45" stroke="#FFFFFF" stroke-width="1.2"/>
+  <rect x="48.5" y="88.5" width="11" height="6" rx="3" fill="#FFFFFF" fill-opacity="0.95"/>
+  <circle cx="65" cy="91.5" r="1.4" fill="#FFFFFF" fill-opacity="0.9"/>
+  <circle cx="71" cy="91.5" r="1.4" fill="#FFFFFF" fill-opacity="0.9"/>
+  <circle cx="76.5" cy="91.5" r="1.4" fill="#FFFFFF" fill-opacity="0.9"/>
+
+  <!-- Specular Optical Flare -->
+  <polygon points="98,22 100,27 105,29 100,31 98,36 96,31 91,29 96,27" fill="#FFFFFF"/>
 </svg>
