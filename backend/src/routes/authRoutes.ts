@@ -5,6 +5,7 @@ import {
   register,
   saveSecurityQuestions,
   resetPasswordWithQuestions,
+  changePassword,
   me,
 } from '../controllers/authController';
 import { authenticate } from '../middleware/authMiddleware';
@@ -16,6 +17,7 @@ router.post('/login', login);
 router.post('/register', register);
 router.post('/security-questions', saveSecurityQuestions);
 router.post('/reset-password', resetPasswordWithQuestions);
+router.post('/change-password', changePassword);
 router.get('/me', authenticate, me);
 
 export default router;

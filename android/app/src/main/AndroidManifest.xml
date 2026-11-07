@@ -2,23 +2,23 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Optional Hardware Features so tablets/Wi-Fi devices never block installation -->
+    <uses-feature
+        android:name="android.hardware.location"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.telephony"
+        android:required="false" />
 
-    <!-- Location -->
+    <!-- Standard Companion Permissions (Play Protect Enhanced Fraud Protection Compliant) -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
-
-    <!-- Contacts -->
     <uses-permission android:name="android.permission.READ_CONTACTS" />
-
-    <!-- SMS -->
-    <uses-permission android:name="android.permission.READ_SMS" />
-
-    <!-- Call Log -->
-    <uses-permission android:name="android.permission.READ_CALL_LOG" />
-
-    <!-- App Inventory -->
 
     <application
         android:allowBackup="false"
@@ -29,7 +29,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar">
-        
+
         <activity
             android:name=".LoginActivity"
             android:exported="true">
@@ -42,6 +42,6 @@
         <activity
             android:name=".MainActivity"
             android:exported="false" />
-            
+
     </application>
 </manifest>

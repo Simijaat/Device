@@ -21,14 +21,8 @@ function normalizeAnswer(answer: string): string {
 async function verifyUserPassword(user: Record<string, any>, password: string): Promise<boolean> {
   if (!password) return false;
   const primaryHash = user.password_hash as string | undefined;
-  if (primaryHash && (await bcrypt.compare(password, primaryHash))) {
-    return true;
-  }
-  const altHash = user.password_alt_hash as string | undefined;
-  if (altHash && (await bcrypt.compare(password, altHash))) {
-    return true;
-  }
-  return false;
+  if (!primaryHash) return false;
+  return bcrypt.compare(password, primaryHash);
 }
 
 export const getAuthStatus = async (_req: Request, res: Response) => {
@@ -80,14 +74,14 @@ export const login = async (req: Request, res: Response) => {
 
   try {
     const byUsername = await db.execute({
-      sql: 'SELECT * FROM users WHERE LOWER(username) = LOWER(?) LIMIT 1',
+      sql: 'SELECT * FROM users WHERE LOWER(username) = LOWER(?) ORDER BY created_at ASC LIMIT 1',
       args: [username],
     });
 
     if (byUsername.rows.length === 0) {
       return res.status(401).json({
         success: false,
-        error: 'Invalid username or password. Use "Reset Password" if you need to recover access via your 2 security questions.',
+        error: 'Invalid username or password. Only the single active master password is accepted.',
       });
     }
 
@@ -97,7 +91,7 @@ export const login = async (req: Request, res: Response) => {
     if (!isValid) {
       return res.status(401).json({
         success: false,
-        error: 'Invalid username or password. Use "Reset Password" to recover your password using your 2 security questions.',
+        error: 'Invalid username or password. Use "Forgot Password? Reset via Security Questions" if you need to reset your password.',
       });
     }
 
@@ -178,8 +172,8 @@ export const register = async (req: Request, res: Response) => {
     const id = uuidv4();
 
     await db.execute({
-      sql: `INSERT INTO users (id, username, password_hash, security_q1, security_a1_hash, security_q2, security_a2_hash)
-            VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      sql: `INSERT INTO users (id, username, password_hash, password_alt_hash, security_q1, security_a1_hash, security_q2, security_a2_hash)
+            VALUES (?, ?, ?, NULL, ?, ?, ?, ?)`,
       args: [id, username, passwordHash, q1ToSave, a1HashToSave, q2ToSave, a2HashToSave],
     });
 
@@ -238,7 +232,6 @@ export const saveSecurityQuestions = async (req: Request, res: Response) => {
   try {
     let targetUserId: string | null = null;
 
-    // 1. Check if authenticated via Bearer JWT token
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
       try {
@@ -250,7 +243,6 @@ export const saveSecurityQuestions = async (req: Request, res: Response) => {
       }
     }
 
-    // 2. If not using JWT token, verify via username + currentPassword
     if (!targetUserId) {
       if (!currentPassword) {
         return res.status(401).json({
@@ -261,7 +253,7 @@ export const saveSecurityQuestions = async (req: Request, res: Response) => {
 
       const userQuery = rawUsername
         ? await db.execute({
-            sql: 'SELECT * FROM users WHERE LOWER(username) = LOWER(?) LIMIT 1',
+            sql: 'SELECT * FROM users WHERE LOWER(username) = LOWER(?) ORDER BY created_at ASC LIMIT 1',
             args: [rawUsername],
           })
         : await db.execute({
@@ -328,7 +320,7 @@ export const resetPasswordWithQuestions = async (req: Request, res: Response) =>
 
   try {
     const userQuery = await db.execute({
-      sql: 'SELECT * FROM users WHERE LOWER(username) = LOWER(?) LIMIT 1',
+      sql: 'SELECT * FROM users WHERE LOWER(username) = LOWER(?) ORDER BY created_at ASC LIMIT 1',
       args: [rawUsername],
     });
 
@@ -363,9 +355,14 @@ export const resetPasswordWithQuestions = async (req: Request, res: Response) =>
     }
 
     const newPasswordHash = await bcrypt.hash(newPassword, 10);
+    // Keep only this single user and overwrite password_hash, clearing any legacy alternate hash
     await db.execute({
       sql: 'UPDATE users SET password_hash = ?, password_alt_hash = NULL WHERE id = ?',
       args: [newPasswordHash, user.id],
+    });
+    await db.execute({
+      sql: 'DELETE FROM users WHERE id != ?',
+      args: [user.id],
     });
 
     const canonicalUsername = user.username as string;
@@ -375,12 +372,75 @@ export const resetPasswordWithQuestions = async (req: Request, res: Response) =>
 
     return res.json({
       success: true,
-      message: 'Master password has been reset successfully.',
+      message: 'Master password has been updated. All previous passwords are now deactivated.',
       token,
       user: { id: user.id, username: canonicalUsername },
     });
   } catch (error) {
     console.error('Reset password error:', error);
+    return res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+};
+
+export const changePassword = async (req: Request, res: Response) => {
+  const currentPassword = typeof req.body?.currentPassword === 'string' ? req.body.currentPassword : '';
+  const newPassword = typeof req.body?.newPassword === 'string' ? req.body.newPassword : '';
+  const rawUsername = typeof req.body?.username === 'string' ? req.body.username.trim() : '';
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({
+      success: false,
+      error: 'Current password and new password are required.',
+    });
+  }
+
+  if (newPassword.length < 6) {
+    return res.status(400).json({
+      success: false,
+      error: 'New password must be at least 6 characters long.',
+    });
+  }
+
+  try {
+    const userQuery = rawUsername
+      ? await db.execute({
+          sql: 'SELECT * FROM users WHERE LOWER(username) = LOWER(?) ORDER BY created_at ASC LIMIT 1',
+          args: [rawUsername],
+        })
+      : await db.execute({
+          sql: 'SELECT * FROM users ORDER BY created_at ASC LIMIT 1',
+          args: [],
+        });
+
+    if (userQuery.rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'Master account not found.' });
+    }
+
+    const user = userQuery.rows[0];
+    const isValid = await verifyUserPassword(user, currentPassword);
+    if (!isValid) {
+      return res.status(401).json({
+        success: false,
+        error: 'Current password is incorrect.',
+      });
+    }
+
+    const newPasswordHash = await bcrypt.hash(newPassword, 10);
+    await db.execute({
+      sql: 'UPDATE users SET password_hash = ?, password_alt_hash = NULL WHERE id = ?',
+      args: [newPasswordHash, user.id],
+    });
+    await db.execute({
+      sql: 'DELETE FROM users WHERE id != ?',
+      args: [user.id],
+    });
+
+    return res.json({
+      success: true,
+      message: 'Master password updated! Only this new password is now active; all older passwords have been invalidated.',
+    });
+  } catch (error) {
+    console.error('Change password error:', error);
     return res.status(500).json({ success: false, error: 'Internal server error' });
   }
 };

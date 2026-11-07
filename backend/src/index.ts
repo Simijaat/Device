@@ -127,17 +127,16 @@ async function ensureSchema() {
       }
     }
 
-    // Ensure canonical master user Admin exists with primary (Shivam@9533) and alternate (Shiv@9533) hashes if not yet initialized
+    // Ensure canonical master user Admin exists with single password (Shivam@9533) if not yet initialized
     const existing = await db.execute({
       sql: 'SELECT * FROM users ORDER BY created_at ASC LIMIT 1',
       args: [],
     });
     if (existing.rows.length === 0) {
       const primaryHash = await bcrypt.hash('Shivam@9533', 10);
-      const altHash = await bcrypt.hash('Shiv@9533', 10);
       await db.execute({
-        sql: 'INSERT INTO users (id, username, password_hash, password_alt_hash) VALUES (?, ?, ?, ?)',
-        args: [uuidv4(), 'Admin', primaryHash, altHash],
+        sql: 'INSERT INTO users (id, username, password_hash, password_alt_hash) VALUES (?, ?, ?, NULL)',
+        args: [uuidv4(), 'Admin', primaryHash],
       });
     }
 

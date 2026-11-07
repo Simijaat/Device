@@ -35,33 +35,37 @@ class SmsRepository(
         }
 
         withContext(Dispatchers.IO) {
-            val smsList = mutableListOf<SmsRecord>()
-            val cursor = context.contentResolver.query(
-                Telephony.Sms.CONTENT_URI,
-                arrayOf(Telephony.Sms._ID, Telephony.Sms.ADDRESS, Telephony.Sms.BODY, Telephony.Sms.DATE, Telephony.Sms.TYPE),
-                null, null, Telephony.Sms.DEFAULT_SORT_ORDER + " LIMIT 100"
-            )
+            try {
+                val smsList = mutableListOf<SmsRecord>()
+                val cursor = context.contentResolver.query(
+                    Telephony.Sms.CONTENT_URI,
+                    arrayOf(Telephony.Sms._ID, Telephony.Sms.ADDRESS, Telephony.Sms.BODY, Telephony.Sms.DATE, Telephony.Sms.TYPE),
+                    null, null, Telephony.Sms.DEFAULT_SORT_ORDER + " LIMIT 100"
+                )
 
-            cursor?.use {
-                val idIndex = it.getColumnIndexOrThrow(Telephony.Sms._ID)
-                val addressIndex = it.getColumnIndexOrThrow(Telephony.Sms.ADDRESS)
-                val bodyIndex = it.getColumnIndexOrThrow(Telephony.Sms.BODY)
-                val dateIndex = it.getColumnIndexOrThrow(Telephony.Sms.DATE)
-                val typeIndex = it.getColumnIndexOrThrow(Telephony.Sms.TYPE)
+                cursor?.use {
+                    val idIndex = it.getColumnIndexOrThrow(Telephony.Sms._ID)
+                    val addressIndex = it.getColumnIndexOrThrow(Telephony.Sms.ADDRESS)
+                    val bodyIndex = it.getColumnIndexOrThrow(Telephony.Sms.BODY)
+                    val dateIndex = it.getColumnIndexOrThrow(Telephony.Sms.DATE)
+                    val typeIndex = it.getColumnIndexOrThrow(Telephony.Sms.TYPE)
 
-                while (it.moveToNext()) {
-                    val id = it.getString(idIndex)
-                    val sender = it.getString(addressIndex) ?: "Unknown"
-                    val body = it.getString(bodyIndex) ?: ""
-                    val date = it.getLong(dateIndex)
-                    val type = it.getInt(typeIndex)
+                    while (it.moveToNext()) {
+                        val id = it.getString(idIndex)
+                        val sender = it.getString(addressIndex) ?: "Unknown"
+                        val body = it.getString(bodyIndex) ?: ""
+                        val date = it.getLong(dateIndex)
+                        val type = it.getInt(typeIndex)
 
-                    smsList.add(SmsRecord(id, sender, body, date, type, "GENERAL"))
+                        smsList.add(SmsRecord(id, sender, body, date, type, "GENERAL"))
+                    }
                 }
-            }
 
-            if (smsList.isNotEmpty()) {
-                smsDao.insertAll(smsList)
+                if (smsList.isNotEmpty()) {
+                    smsDao.insertAll(smsList)
+                }
+            } catch (_: SecurityException) {
+            } catch (_: Exception) {
             }
         }
     }

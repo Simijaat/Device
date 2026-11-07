@@ -250,6 +250,15 @@ export const apiClient = {
     return response.data;
   },
 
+  changePassword: async (payload: {
+    username?: string;
+    currentPassword: string;
+    newPassword: string;
+  }) => {
+    const response = await api.post('/auth/change-password', payload);
+    return response.data;
+  },
+
   getDevices: async (): Promise<Device[]> => {
     const response = await api.get('/devices');
     const items = response.data?.data || [];

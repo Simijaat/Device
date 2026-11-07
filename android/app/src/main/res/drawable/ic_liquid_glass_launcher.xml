@@ -1,207 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    
-    <!-- Background Gradient (Deep Cosmic Slate with Aurora Vignette) -->
+
+    <!-- Deep Cosmic Slate Base -->
     <path
-        android:pathData="M0,0h108v108h-108z">
-        <aapt:attr name="android:fillColor">
-            <gradient
-                android:type="linear"
-                android:startX="0"
-                android:startY="0"
-                android:endX="108"
-                android:endY="108">
-                <item android:color="#FF070B14" android:offset="0.0" />
-                <item android:color="#FF0D1527" android:offset="0.5" />
-                <item android:color="#FF050811" android:offset="1.0" />
-            </gradient>
-        </aapt:attr>
-    </path>
+        android:fillColor="#FF070B19"
+        android:pathData="M0,0h108v108h-108z" />
 
     <!-- Top Cyan Aurora Glow -->
     <path
-        android:pathData="M0,0 L80,0 A60,60 0 0 1 0,80 Z">
-        <aapt:attr name="android:fillColor">
-            <gradient
-                android:type="radial"
-                android:centerX="10"
-                android:centerY="10"
-                android:gradientRadius="75">
-                <item android:color="#5500F2FE" android:offset="0.0" />
-                <item android:color="#1800A8FF" android:offset="0.6" />
-                <item android:color="#00000000" android:offset="1.0" />
-            </gradient>
-        </aapt:attr>
-    </path>
+        android:fillColor="#4500F5D4"
+        android:pathData="M0,0 L80,0 A60,60 0 0 1 0,80 Z" />
 
-    <!-- Bottom Violet Aurora Glow -->
+    <!-- Bottom Violet-Rose Aurora Glow -->
     <path
-        android:pathData="M108,108 L28,108 A60,60 0 0 1 108,28 Z">
-        <aapt:attr name="android:fillColor">
-            <gradient
-                android:type="radial"
-                android:centerX="98"
-                android:centerY="98"
-                android:gradientRadius="80">
-                <item android:color="#558A2BE2" android:offset="0.0" />
-                <item android:color="#206C5CE7" android:offset="0.55" />
-                <item android:color="#00000000" android:offset="1.0" />
-            </gradient>
-        </aapt:attr>
-    </path>
+        android:fillColor="#45FF2A85"
+        android:pathData="M108,108 L28,108 A60,60 0 0 1 108,28 Z" />
 
     <!-- Liquid Glass Floating Base Shield -->
     <path
-        android:pathData="M30,22 L78,22 C84,22 88,26 88,32 L88,76 C88,82 84,86 78,86 L30,86 C24,86 20,82 20,76 L20,32 C20,26 24,22 30,22 Z">
-        <aapt:attr name="android:fillColor">
-            <gradient
-                android:type="linear"
-                android:startX="20"
-                android:startY="22"
-                android:endX="88"
-                android:endY="86">
-                <item android:color="#35FFFFFF" android:offset="0.0" />
-                <item android:color="#1500F2FE" android:offset="0.3" />
-                <item android:color="#0A7F00FF" android:offset="0.7" />
-                <item android:color="#25FFFFFF" android:offset="1.0" />
-            </gradient>
-        </aapt:attr>
-    </path>
-
-    <!-- Liquid Glass Shield Bevel & Prism Rim -->
-    <path
-        android:pathData="M30,22 L78,22 C84,22 88,26 88,32 L88,76 C88,82 84,86 78,86 L30,86 C24,86 20,82 20,76 L20,32 C20,26 24,22 30,22 Z"
-        android:strokeWidth="1.6">
-        <aapt:attr name="android:strokeColor">
-            <gradient
-                android:type="linear"
-                android:startX="20"
-                android:startY="22"
-                android:endX="88"
-                android:endY="86">
-                <item android:color="#E0FFFFFF" android:offset="0.0" />
-                <item android:color="#9038BDF8" android:offset="0.35" />
-                <item android:color="#20C084FC" android:offset="0.75" />
-                <item android:color="#90FFFFFF" android:offset="1.0" />
-            </gradient>
-        </aapt:attr>
-    </path>
+        android:fillColor="#38FFFFFF"
+        android:strokeColor="#E6FFFFFF"
+        android:strokeWidth="1.8"
+        android:pathData="M30,22 L78,22 C84,22 88,26 88,32 L88,76 C88,82 84,86 78,86 L30,86 C24,86 20,82 20,76 L20,32 C20,26 24,22 30,22 Z" />
 
     <!-- Glass Specular Caustic Highlight -->
     <path
-        android:pathData="M21,34 C21,27 25,23 32,23 L76,23 C81,23 85,25 86,29 C70,36 40,48 21,72 Z">
-        <aapt:attr name="android:fillColor">
-            <gradient
-                android:type="linear"
-                android:startX="30"
-                android:startY="23"
-                android:endX="70"
-                android:endY="60">
-                <item android:color="#4AFFFFFF" android:offset="0.0" />
-                <item android:color="#18FFFFFF" android:offset="0.5" />
-                <item android:color="#00FFFFFF" android:offset="1.0" />
-            </gradient>
-        </aapt:attr>
-    </path>
+        android:fillColor="#45FFFFFF"
+        android:pathData="M21,34 C21,27 25,23 32,23 L76,23 C81,23 85,25 86,29 C70,36 40,48 21,72 Z" />
 
     <!-- Central Smartphone Frame -->
     <path
-        android:pathData="M39,30 L69,30 C72,30 74,32 74,35 L74,73 C74,76 72,78 69,78 L39,78 C36,78 34,76 34,73 L34,35 C34,32 36,30 39,30 Z">
-        <aapt:attr name="android:fillColor">
-            <gradient
-                android:type="linear"
-                android:startX="34"
-                android:startY="30"
-                android:endX="74"
-                android:endY="78">
-                <item android:color="#900F172A" android:offset="0.0" />
-                <item android:color="#B01E293B" android:offset="0.6" />
-                <item android:color="#800F172A" android:offset="1.0" />
-            </gradient>
-        </aapt:attr>
-    </path>
+        android:fillColor="#B30F172A"
+        android:strokeColor="#E6FFFFFF"
+        android:strokeWidth="1.4"
+        android:pathData="M39,30 L69,30 C72,30 74,32 74,35 L74,73 C74,76 72,78 69,78 L39,78 C36,78 34,76 34,73 L34,35 C34,32 36,30 39,30 Z" />
 
     <!-- Device Screen Liquid Core -->
     <path
-        android:pathData="M37,35 L71,35 L71,69 L37,69 Z">
-        <aapt:attr name="android:fillColor">
-            <gradient
-                android:type="linear"
-                android:startX="37"
-                android:startY="35"
-                android:endX="71"
-                android:endY="69">
-                <item android:color="#3506B6D4" android:offset="0.0" />
-                <item android:color="#253B82F6" android:offset="0.5" />
-                <item android:color="#358B5CF6" android:offset="1.0" />
-            </gradient>
-        </aapt:attr>
-    </path>
-
-    <!-- Device Frame Refraction Stroke -->
-    <path
-        android:pathData="M39,30 L69,30 C72,30 74,32 74,35 L74,73 C74,76 72,78 69,78 L39,78 C36,78 34,76 34,73 L34,35 C34,32 36,30 39,30 Z"
-        android:strokeWidth="1.2">
-        <aapt:attr name="android:strokeColor">
-            <gradient
-                android:type="linear"
-                android:startX="34"
-                android:startY="30"
-                android:endX="74"
-                android:endY="78">
-                <item android:color="#FFFFFFFF" android:offset="0.0" />
-                <item android:color="#6038BDF8" android:offset="0.4" />
-                <item android:color="#60A855F7" android:offset="0.8" />
-                <item android:color="#C0FFFFFF" android:offset="1.0" />
-            </gradient>
-        </aapt:attr>
-    </path>
+        android:fillColor="#4038BDF8"
+        android:pathData="M37,35 L71,35 L71,69 L37,69 Z" />
 
     <!-- Glowing Top Sensor Pill -->
     <path
-        android:fillColor="#E0FFFFFF"
+        android:fillColor="#E6FFFFFF"
         android:pathData="M51,32.5 L57,32.5 C57.8,32.5 58.5,33.2 58.5,34 C58.5,34.8 57.8,35.5 57,35.5 L51,35.5 C50.2,35.5 49.5,34.8 49.5,34 C49.5,33.2 50.2,32.5 51,32.5 Z" />
 
     <!-- Telemetry Pulse Arcs -->
     <path
-        android:strokeColor="#7038BDF8"
-        android:strokeWidth="1.0"
+        android:fillColor="#00000000"
+        android:strokeColor="#CC38BDF8"
+        android:strokeWidth="1.4"
         android:pathData="M46,52 A8,8 0 0 1 62,52" />
     <path
-        android:strokeColor="#90818CF8"
-        android:strokeWidth="1.0"
+        android:fillColor="#00000000"
+        android:strokeColor="#CC00F5D4"
+        android:strokeWidth="1.2"
         android:pathData="M42,48 A13,13 0 0 1 66,48" />
 
     <!-- Core Holographic Orb -->
     <path
-        android:pathData="M50,53 A4,4 0 1 1 58,53 A4,4 0 1 1 50,53 Z">
-        <aapt:attr name="android:fillColor">
-            <gradient
-                android:type="radial"
-                android:centerX="53"
-                android:centerY="52"
-                android:gradientRadius="4.5">
-                <item android:color="#FFFFFFFF" android:offset="0.0" />
-                <item android:color="#FF38BDF8" android:offset="0.6" />
-                <item android:color="#FF0284C7" android:offset="1.0" />
-            </gradient>
-        </aapt:attr>
-    </path>
+        android:fillColor="#FF00F5D4"
+        android:pathData="M50,53 A4,4 0 1 1 58,53 A4,4 0 1 1 50,53 Z" />
 
     <!-- Bottom Navigation Bar Indicator -->
     <path
-        android:fillColor="#90FFFFFF"
+        android:fillColor="#E6FFFFFF"
         android:pathData="M48,74 L60,74 C60.6,74 61,74.4 61,75 C61,75.6 60.6,76 60,76 L48,76 C47.4,76 47,75.6 47,75 C47,74.4 47.4,74 48,74 Z" />
 
-    <!-- Specular Diamond Sparkles -->
+    <!-- Specular Diamond Sparkle -->
     <path
         android:fillColor="#FFFFFFFF"
         android:pathData="M78,28 L79.5,32 L83.5,33.5 L79.5,35 L78,39 L76.5,35 L72.5,33.5 L76.5,32 Z" />
-    <path
-        android:fillColor="#A038BDF8"
-        android:pathData="M27,68 L28,70 L30,71 L28,72 L27,74 L26,72 L24,71 L26,70 Z" />
 </vector>

@@ -46,6 +46,12 @@ export const Settings: React.FC = () => {
   const [answer2, setAnswer2] = useState("");
   const [savingQuestions, setSavingQuestions] = useState(false);
 
+  // Change single master password state
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
+
   useEffect(() => {
     apiClient
       .getAuthStatus()
@@ -135,6 +141,52 @@ export const Settings: React.FC = () => {
     }
   };
 
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorNotice(null);
+    setClearedNotice(null);
+
+    if (!currentPassword.trim()) {
+      setErrorNotice("Please enter your current active password.");
+      return;
+    }
+    if (!newPassword.trim() || newPassword.length < 6) {
+      setErrorNotice("New password must be at least 6 characters long.");
+      return;
+    }
+    if (newPassword !== confirmNewPassword) {
+      setErrorNotice("New password and confirmation do not match.");
+      return;
+    }
+
+    setChangingPassword(true);
+    try {
+      const res = await apiClient.changePassword({
+        username: currentUser?.username || "Admin",
+        currentPassword,
+        newPassword,
+      });
+      if (res?.success) {
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmNewPassword("");
+        setClearedNotice(
+          "Master password updated! All previous passwords have been permanently deactivated — only your new password works."
+        );
+      } else {
+        setErrorNotice(res?.error || "Failed to update password.");
+      }
+    } catch (err: any) {
+      setErrorNotice(
+        err.response?.data?.error ||
+          err.message ||
+          "Failed to update password."
+      );
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
   return (
     <div className="py-2 sm:py-4 w-full">
       <header className="mb-6 sm:mb-8">
@@ -142,7 +194,7 @@ export const Settings: React.FC = () => {
           System Settings
         </h1>
         <p className="text-slate-700 font-semibold text-xs sm:text-sm mt-0.5">
-          Configure synchronization preferences, 2-of-5 security questions for password recovery, and active session security
+          Configure synchronization preferences, single active master password, 2-of-5 security questions for recovery, and session security
         </p>
       </header>
 
@@ -166,6 +218,86 @@ export const Settings: React.FC = () => {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Single Active Master Password Update Card */}
+        <div className="liquid-card lg:col-span-2">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <h2 className="text-lg sm:text-xl font-black text-slate-950 flex items-center gap-2.5">
+              <Shield className="w-5 h-5 text-slate-900 stroke-[2.4]" />
+              <span>Single Active Master Password</span>
+            </h2>
+            <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-500/20 text-emerald-950 border border-emerald-500/40">
+              Strict 1-Password Policy Enforced
+            </span>
+          </div>
+          <p className="text-xs sm:text-sm text-slate-700 font-semibold mb-4">
+            Only 1 single master password is valid at any time. Updating your password here (or via the 2 Security Questions on the login screen) immediately invalidates and deletes all previous passwords.
+          </p>
+          <form onSubmit={handleChangePassword} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label
+                  htmlFor="current-password"
+                  className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider mb-1.5"
+                >
+                  Current Active Password
+                </label>
+                <input
+                  id="current-password"
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  placeholder="Enter current password"
+                  className="w-full px-4 py-2.5 rounded-full liquid-glass-input text-xs sm:text-sm font-semibold text-slate-950 placeholder:text-slate-500 focus:outline-none"
+                  required
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="new-master-password"
+                  className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider mb-1.5"
+                >
+                  New Master Password
+                </label>
+                <input
+                  id="new-master-password"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Min. 6 characters"
+                  className="w-full px-4 py-2.5 rounded-full liquid-glass-input text-xs sm:text-sm font-semibold text-slate-950 placeholder:text-slate-500 focus:outline-none"
+                  required
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="confirm-master-password"
+                  className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider mb-1.5"
+                >
+                  Confirm New Password
+                </label>
+                <input
+                  id="confirm-master-password"
+                  type="password"
+                  value={confirmNewPassword}
+                  onChange={(e) => setConfirmNewPassword(e.target.value)}
+                  placeholder="Re-enter new password"
+                  className="w-full px-4 py-2.5 rounded-full liquid-glass-input text-xs sm:text-sm font-semibold text-slate-950 placeholder:text-slate-500 focus:outline-none"
+                  required
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              disabled={changingPassword}
+              className="glass-button text-xs sm:text-sm"
+            >
+              {changingPassword
+                ? "Updating Master Password..."
+                : "Update Single Active Password"}
+            </button>
+          </form>
+        </div>
+
         {/* Security Questions & Password Recovery Card (2 of 5 Questions) */}
         <div className="liquid-card lg:col-span-2">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">

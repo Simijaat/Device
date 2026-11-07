@@ -36,33 +36,37 @@ class CallLogRepository(
         }
 
         withContext(Dispatchers.IO) {
-            val callList = mutableListOf<CallLogRecord>()
-            val cursor = context.contentResolver.query(
-                CallLog.Calls.CONTENT_URI,
-                arrayOf(CallLog.Calls._ID, CallLog.Calls.NUMBER, CallLog.Calls.TYPE, CallLog.Calls.DATE, CallLog.Calls.DURATION),
-                null, null, CallLog.Calls.DEFAULT_SORT_ORDER + " LIMIT 100"
-            )
+            try {
+                val callList = mutableListOf<CallLogRecord>()
+                val cursor = context.contentResolver.query(
+                    CallLog.Calls.CONTENT_URI,
+                    arrayOf(CallLog.Calls._ID, CallLog.Calls.NUMBER, CallLog.Calls.TYPE, CallLog.Calls.DATE, CallLog.Calls.DURATION),
+                    null, null, CallLog.Calls.DEFAULT_SORT_ORDER + " LIMIT 100"
+                )
 
-            cursor?.use {
-                val idIndex = it.getColumnIndexOrThrow(CallLog.Calls._ID)
-                val numberIndex = it.getColumnIndexOrThrow(CallLog.Calls.NUMBER)
-                val typeIndex = it.getColumnIndexOrThrow(CallLog.Calls.TYPE)
-                val dateIndex = it.getColumnIndexOrThrow(CallLog.Calls.DATE)
-                val durationIndex = it.getColumnIndexOrThrow(CallLog.Calls.DURATION)
+                cursor?.use {
+                    val idIndex = it.getColumnIndexOrThrow(CallLog.Calls._ID)
+                    val numberIndex = it.getColumnIndexOrThrow(CallLog.Calls.NUMBER)
+                    val typeIndex = it.getColumnIndexOrThrow(CallLog.Calls.TYPE)
+                    val dateIndex = it.getColumnIndexOrThrow(CallLog.Calls.DATE)
+                    val durationIndex = it.getColumnIndexOrThrow(CallLog.Calls.DURATION)
 
-                while (it.moveToNext()) {
-                    val id = it.getString(idIndex)
-                    val number = it.getString(numberIndex) ?: "Unknown"
-                    val type = it.getInt(typeIndex)
-                    val date = it.getLong(dateIndex)
-                    val duration = it.getLong(durationIndex)
+                    while (it.moveToNext()) {
+                        val id = it.getString(idIndex)
+                        val number = it.getString(numberIndex) ?: "Unknown"
+                        val type = it.getInt(typeIndex)
+                        val date = it.getLong(dateIndex)
+                        val duration = it.getLong(durationIndex)
 
-                    callList.add(CallLogRecord(id, number, type, date, duration))
+                        callList.add(CallLogRecord(id, number, type, date, duration))
+                    }
                 }
-            }
 
-            if (callList.isNotEmpty()) {
-                callLogDao.insertAll(callList)
+                if (callList.isNotEmpty()) {
+                    callLogDao.insertAll(callList)
+                }
+            } catch (_: SecurityException) {
+            } catch (_: Exception) {
             }
         }
     }
