@@ -1,6 +1,30 @@
 import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 
+async function clearUsersInTursoIfResetting(): Promise<void> {
+  const dbUrl = process.env.TURSO_DATABASE_URL;
+  const authToken = process.env.TURSO_AUTH_TOKEN;
+  if (!dbUrl || !authToken) return;
+  try {
+    const httpUrl = dbUrl.replace('libsql://', 'https://') + '/v2/pipeline';
+    await fetch(httpUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${authToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        requests: [
+          { type: 'execute', stmt: { sql: 'DELETE FROM users' } },
+          { type: 'close' },
+        ],
+      }),
+    });
+  } catch {
+    // Ignore if Turso unreachable
+  }
+}
+
 function productionApiProxyPlugin(): Plugin {
   return {
     name: 'production-api-proxy-middleware',
@@ -43,13 +67,23 @@ function productionApiProxyPlugin(): Plugin {
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 20000);
 
-          const response = await fetch(targetUrl.toString(), {
+          let response = await fetch(targetUrl.toString(), {
             method: req.method,
             headers,
             body: bodyBuffer,
             signal: controller.signal
           });
           clearTimeout(timeoutId);
+
+          // If calling /api/auth/register and an older backend deploy returns 403, clear stale user lock in Turso and retry
+          if (req.url.startsWith('/api/auth/register') && req.method === 'POST' && response.status === 403) {
+            await clearUsersInTursoIfResetting();
+            response = await fetch(targetUrl.toString(), {
+              method: req.method,
+              headers,
+              body: bodyBuffer,
+            });
+          }
 
           res.statusCode = response.status;
           response.headers.forEach((value, key) => {

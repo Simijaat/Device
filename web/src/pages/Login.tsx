@@ -16,31 +16,46 @@ export const Login: React.FC = () => {
     setError("");
     setLoading(true);
 
-    try {
-      if (isRegistering) {
-        await apiClient.register(username, password);
-      }
+    const cleanUsername = username.trim();
 
-      let result;
-      try {
-        result = await apiClient.login(username, password);
-      } catch (loginErr: any) {
-        // If no master account has been initialized yet, try registering first then signing in
-        if (!isRegistering && loginErr?.response?.status === 401) {
-          try {
-            await apiClient.register(username, password);
-            result = await apiClient.login(username, password);
-          } catch {
+    try {
+      let result: any;
+
+      if (isRegistering) {
+        const regRes = await apiClient.register(cleanUsername, password);
+        if (regRes?.success && regRes?.token) {
+          result = regRes;
+        } else {
+          result = await apiClient.login(cleanUsername, password);
+        }
+      } else {
+        try {
+          result = await apiClient.login(cleanUsername, password);
+        } catch (loginErr: any) {
+          // If first-time setup or master credentials need initialization, register and sign in
+          if (loginErr?.response?.status === 401) {
+            try {
+              const regRes = await apiClient.register(cleanUsername, password);
+              if (regRes?.success && regRes?.token) {
+                result = regRes;
+              } else {
+                result = await apiClient.login(cleanUsername, password);
+              }
+            } catch {
+              throw loginErr;
+            }
+          } else {
             throw loginErr;
           }
-        } else {
-          throw loginErr;
         }
       }
 
       if (result?.success && result?.token) {
         localStorage.setItem("auth_token", result.token);
-        localStorage.setItem("auth_user", JSON.stringify(result.user || { username }));
+        localStorage.setItem(
+          "auth_user",
+          JSON.stringify(result.user || { username: cleanUsername })
+        );
         navigate("/");
       } else {
         setError(result?.error || "Authentication failed: No token returned.");
@@ -49,10 +64,17 @@ export const Login: React.FC = () => {
       const serverMsg = err.response?.data?.error;
       if (serverMsg) {
         setError(serverMsg);
-      } else if (err.code === "ERR_NETWORK" || err.message?.includes("Network Error")) {
-        setError(`Cannot reach production backend (${DEFAULT_PRODUCTION_API}). If the Render server is waking up, please wait a few seconds and try again.`);
+      } else if (
+        err.code === "ERR_NETWORK" ||
+        err.message?.includes("Network Error")
+      ) {
+        setError(
+          `Cannot reach production backend (${DEFAULT_PRODUCTION_API}). If the Render server is waking up, please wait a few seconds and try again.`
+        );
       } else {
-        setError(err.message || (isRegistering ? "Registration failed" : "Login failed"));
+        setError(
+          err.message || (isRegistering ? "Registration failed" : "Login failed")
+        );
       }
     } finally {
       setLoading(false);
@@ -69,7 +91,11 @@ export const Login: React.FC = () => {
       <div className="w-full max-w-md p-8 sm:p-10 liquid-glass rounded-[2.25rem] relative z-10">
         <div className="flex flex-col items-center mb-7">
           <div className="w-20 h-20 rounded-3xl liquid-glass-droplet p-2 flex items-center justify-center mb-4">
-            <img src="/favicon.svg" alt="Device Manager Logo" className="w-16 h-16 rounded-2xl drop-shadow-md" />
+            <img
+              src="/favicon.svg"
+              alt="Device Manager Logo"
+              className="w-16 h-16 rounded-2xl drop-shadow-md"
+            />
           </div>
           <h1 className="text-3xl font-black text-slate-950 tracking-tight text-center">
             Device Manager
@@ -132,7 +158,7 @@ export const Login: React.FC = () => {
               {loading
                 ? "Authenticating with Backend..."
                 : isRegistering
-                ? "Initialize Master Account"
+                ? "Set / Reset Master Account"
                 : "Sign In to Dashboard"}
             </span>
             <ArrowRight className="w-4 h-4 stroke-[2.6]" />
@@ -148,8 +174,8 @@ export const Login: React.FC = () => {
               }}
             >
               {isRegistering
-                ? "Already initialized? Sign In"
-                : "First time setup? Initialize master account"}
+                ? "Already have credentials? Sign In"
+                : "First time setup or reset credentials? Initialize master account"}
             </button>
           </div>
         </form>
