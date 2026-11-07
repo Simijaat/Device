@@ -57,3 +57,11 @@ export interface PermissionStatus {
   permission: string;
   granted: boolean;
 }
+
+export interface BatteryDataPoint {
+  timestamp: string;
+  timeLabel: string;
+  batteryLevel: number;
+  isCharging: boolean;
+  status: 'Charging' | 'Discharging' | 'Full';
+}

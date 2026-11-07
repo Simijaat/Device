@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { apiClient } from "../services/apiClient";
 import type { Device } from "../types";
+import { BatteryHistoryChart } from "../components/BatteryHistoryChart";
 
 export const Dashboard: React.FC = () => {
   const [devices, setDevices] = useState<Device[]>([]);
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,6 +31,8 @@ export const Dashboard: React.FC = () => {
     fetchDevices();
   }, []);
 
+  const selectedDevice = devices.find(d => d.id === selectedDeviceId) || (devices.length > 0 ? devices[0] : undefined);
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-full p-8">
@@ -46,7 +50,7 @@ export const Dashboard: React.FC = () => {
             Dashboard Overview
           </h1>
           <p className="text-indigo-900/60 font-medium text-xs sm:text-sm mt-0.5">
-            Real-time management for authorized personal devices
+            Real-time management and telemetry for authorized personal devices
           </p>
         </div>
         <button
@@ -83,6 +87,27 @@ export const Dashboard: React.FC = () => {
         </div>
       )}
 
+      {/* Battery Level History Visualization with Recharts */}
+      {devices.length > 0 && selectedDevice && (
+        <BatteryHistoryChart
+          device={selectedDevice}
+          allDevices={devices}
+          onSelectDevice={setSelectedDeviceId}
+        />
+      )}
+
+      {/* Devices Grid Header */}
+      <div className="flex justify-between items-center mb-4">
+        <div>
+          <h2 className="text-lg font-extrabold text-gray-800 tracking-tight">
+            Connected Devices ({devices.length})
+          </h2>
+          <p className="text-xs text-gray-500 font-medium">
+            Click any device card below to view its battery telemetry curve
+          </p>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
         {devices.length === 0 ? (
           <div className="col-span-full liquid-card flex flex-col items-center justify-center p-8 sm:p-14 text-center">
@@ -93,40 +118,58 @@ export const Dashboard: React.FC = () => {
             </p>
           </div>
         ) : (
-          devices.map((device) => (
-            <div key={device.id} className="liquid-card group">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="font-bold text-lg sm:text-xl text-gray-800 tracking-tight">{device.name}</h3>
-                  <p className="text-xs sm:text-sm font-medium text-gray-500">{device.model}</p>
+          devices.map((device) => {
+            const isSelected = selectedDevice?.id === device.id;
+            return (
+              <div
+                key={device.id}
+                onClick={() => setSelectedDeviceId(device.id)}
+                className={`liquid-card group cursor-pointer transition-all duration-300 ${
+                  isSelected
+                    ? 'ring-2 ring-indigo-500 shadow-indigo-500/20 bg-white/70 scale-[1.01]'
+                    : 'hover:bg-white/60 hover:scale-[1.005]'
+                }`}
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-bold text-lg sm:text-xl text-gray-800 tracking-tight">{device.name}</h3>
+                      {isSelected && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-600 text-white tracking-wider">
+                          Active Chart
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs sm:text-sm font-medium text-gray-500">{device.model}</p>
+                  </div>
+                  <div className={`px-2.5 py-1 rounded-xl text-xs font-semibold backdrop-blur-md border ${
+                    device.isOnline 
+                      ? 'bg-green-100/60 border-green-200 text-green-700' 
+                      : 'bg-gray-100/60 border-gray-200 text-gray-600'
+                  }`}>
+                    {device.isOnline ? 'Online' : 'Offline'}
+                  </div>
                 </div>
-                <div className={`px-2.5 py-1 rounded-xl text-xs font-semibold backdrop-blur-md border ${
-                  device.isOnline 
-                    ? 'bg-green-100/60 border-green-200 text-green-700' 
-                    : 'bg-gray-100/60 border-gray-200 text-gray-600'
-                }`}>
-                  {device.isOnline ? 'Online' : 'Offline'}
+                
+                <div className="space-y-2.5 mt-5">
+                   <div className="flex justify-between items-center p-2.5 rounded-xl bg-white/40 border border-white/50 text-xs sm:text-sm">
+                      <span className="text-gray-600 font-medium flex items-center gap-1.5"><span>🔋</span> Battery</span>
+                      <span className="font-bold text-gray-800">{device.batteryLevel}% {device.isCharging && '⚡'}</span>
+                   </div>
+                   <div className="flex justify-between items-center p-2.5 rounded-xl bg-white/40 border border-white/50 text-xs sm:text-sm">
+                      <span className="text-gray-600 font-medium flex items-center gap-1.5"><span>📶</span> Network</span>
+                      <span className="font-bold text-gray-800">{device.networkType || 'Unknown'}</span>
+                   </div>
+                   <div className="flex justify-between items-center p-2.5 rounded-xl bg-white/40 border border-white/50 text-xs sm:text-sm">
+                      <span className="text-gray-600 font-medium flex items-center gap-1.5"><span>⏱️</span> Last Sync</span>
+                      <span className="font-bold text-gray-800 truncate max-w-[140px] text-xs">
+                        {device.lastSeen ? new Date(device.lastSeen).toLocaleString() : 'Never'}
+                      </span>
+                   </div>
                 </div>
               </div>
-              
-              <div className="space-y-2.5 mt-5">
-                 <div className="flex justify-between items-center p-2.5 rounded-xl bg-white/40 border border-white/50 text-xs sm:text-sm">
-                    <span className="text-gray-600 font-medium flex items-center gap-1.5"><span>🔋</span> Battery</span>
-                    <span className="font-bold text-gray-800">{device.batteryLevel}% {device.isCharging && '⚡'}</span>
-                 </div>
-                 <div className="flex justify-between items-center p-2.5 rounded-xl bg-white/40 border border-white/50 text-xs sm:text-sm">
-                    <span className="text-gray-600 font-medium flex items-center gap-1.5"><span>📶</span> Network</span>
-                    <span className="font-bold text-gray-800">{device.networkType || 'Unknown'}</span>
-                 </div>
-                 <div className="flex justify-between items-center p-2.5 rounded-xl bg-white/40 border border-white/50 text-xs sm:text-sm">
-                    <span className="text-gray-600 font-medium flex items-center gap-1.5"><span>⏱️</span> Last Sync</span>
-                    <span className="font-bold text-gray-800 truncate max-w-[140px] text-xs">
-                      {device.lastSeen ? new Date(device.lastSeen).toLocaleString() : 'Never'}
-                    </span>
-                 </div>
-              </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>
