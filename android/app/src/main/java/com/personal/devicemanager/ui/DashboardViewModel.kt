@@ -60,15 +60,10 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun syncAll() {
         viewModelScope.launch {
-            if (!localState.masterCollectionEnabled) {
-                Log.d("DashboardViewModel", "Master collection is disabled; skipping syncAll")
-                return@launch
-            }
-
             val deviceId = encryptedPrefs.getOrCreateDeviceId()
             val deviceInfo = DeviceInfoUtils.getDeviceInfo(getApplication())
 
-            // 1. Device Registration & Telemetry Status
+            // 1. Device Registration & Telemetry Status (Non-sensitive basic device heartbeat)
             try {
                 apiService.registerDevice(
                     RegisterDeviceRequest(
@@ -83,13 +78,18 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                 apiService.updateDeviceStatus(
                     deviceId = deviceId,
                     status = DeviceStatusPayload(
-                        battery_level = deviceInfo.batteryPercentage,
+                        battery_level = deviceInfo.batteryPercentage.coerceIn(0, 100),
                         is_charging = deviceInfo.isCharging,
                         network_type = deviceInfo.networkState
                     )
                 )
             } catch (e: Exception) {
                 Log.w("DashboardViewModel", "Device status sync failed: ${e.message}")
+            }
+
+            if (!localState.masterCollectionEnabled) {
+                Log.d("DashboardViewModel", "Master collection is disabled; skipping sensitive telemetry sync")
+                return@launch
             }
 
             // 2. Location Collection & Transmission (Double Gated)

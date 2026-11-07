@@ -20,13 +20,30 @@ export const Login: React.FC = () => {
       if (isRegistering) {
         await apiClient.register(username, password);
       }
-      const result = await apiClient.login(username, password);
-      if (result.success && result.token) {
+
+      let result;
+      try {
+        result = await apiClient.login(username, password);
+      } catch (loginErr: any) {
+        // If no master account has been initialized yet, try registering first then signing in
+        if (!isRegistering && loginErr?.response?.status === 401) {
+          try {
+            await apiClient.register(username, password);
+            result = await apiClient.login(username, password);
+          } catch {
+            throw loginErr;
+          }
+        } else {
+          throw loginErr;
+        }
+      }
+
+      if (result?.success && result?.token) {
         localStorage.setItem("auth_token", result.token);
         localStorage.setItem("auth_user", JSON.stringify(result.user || { username }));
         navigate("/");
       } else {
-        setError(result.error || "Authentication failed: No token returned.");
+        setError(result?.error || "Authentication failed: No token returned.");
       }
     } catch (err: any) {
       const serverMsg = err.response?.data?.error;

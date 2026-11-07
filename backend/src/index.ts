@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import { env } from './config/env';
+import { db } from './config/db';
 import authRoutes from './routes/authRoutes';
 import deviceRoutes from './routes/deviceRoutes';
 import messagesRoutes from './routes/messagesRoutes';
@@ -17,32 +18,120 @@ dotenv.config();
 const app = express();
 const port = parseInt(env.PORT, 10);
 
-// Security Headers
+async function ensureSchema() {
+  const statements = [
+    `CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      username TEXT UNIQUE NOT NULL,
+      password_hash TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`,
+    `CREATE TABLE IF NOT EXISTS devices (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      name TEXT NOT NULL,
+      model TEXT,
+      android_version TEXT,
+      app_version TEXT,
+      last_seen DATETIME DEFAULT CURRENT_TIMESTAMP,
+      is_online BOOLEAN DEFAULT 0,
+      battery_level INTEGER,
+      is_charging BOOLEAN DEFAULT 0,
+      network_type TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    )`,
+    `CREATE TABLE IF NOT EXISTS messages (
+      id TEXT PRIMARY KEY,
+      device_id TEXT NOT NULL,
+      sender TEXT NOT NULL,
+      content TEXT NOT NULL,
+      type TEXT NOT NULL,
+      timestamp DATETIME NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE CASCADE
+    )`,
+    `CREATE TABLE IF NOT EXISTS calls (
+      id TEXT PRIMARY KEY,
+      device_id TEXT NOT NULL,
+      number TEXT NOT NULL,
+      type TEXT NOT NULL,
+      duration INTEGER NOT NULL,
+      timestamp DATETIME NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE CASCADE
+    )`,
+    `CREATE TABLE IF NOT EXISTS contacts (
+      id TEXT PRIMARY KEY,
+      device_id TEXT NOT NULL,
+      name TEXT NOT NULL,
+      phone_number TEXT NOT NULL,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE CASCADE
+    )`,
+    `CREATE TABLE IF NOT EXISTS locations (
+      id TEXT PRIMARY KEY,
+      device_id TEXT NOT NULL,
+      latitude REAL NOT NULL,
+      longitude REAL NOT NULL,
+      accuracy REAL,
+      timestamp DATETIME NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE CASCADE
+    )`,
+    `CREATE TABLE IF NOT EXISTS installed_apps (
+      id TEXT PRIMARY KEY,
+      device_id TEXT NOT NULL,
+      app_name TEXT NOT NULL,
+      package_name TEXT NOT NULL,
+      version_name TEXT,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE CASCADE
+    )`,
+    `CREATE TABLE IF NOT EXISTS sync_logs (
+      id TEXT PRIMARY KEY,
+      device_id TEXT NOT NULL,
+      sync_type TEXT NOT NULL,
+      status TEXT NOT NULL,
+      message TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE CASCADE
+    )`
+  ];
+  try {
+    for (const sql of statements) {
+      await db.execute(sql);
+    }
+    console.log('Database schema verified.');
+  } catch (err) {
+    console.error('Database schema verification warning:', err);
+  }
+}
+
 app.use(helmet());
 
-// CORS configuration (allow credentials, restrict to specific origin in prod)
 app.use(cors({
-  origin: env.CORS_ORIGIN,
+  origin: (origin, callback) => {
+    callback(null, true);
+  },
   credentials: true
 }));
 
-// Body parsing with limits
 app.use(express.json({ limit: '5mb' }));
 
-// Rate Limiting
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20, // limit each IP to 20 requests per windowMs for auth
+  windowMs: 15 * 60 * 1000,
+  max: 50,
   message: { success: false, error: 'Too many authentication attempts, please try again later.' }
 });
 
 const apiLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 200, // limit each IP to 200 requests per minute
+  windowMs: 1 * 60 * 1000,
+  max: 300,
   message: { success: false, error: 'Too many API requests, please try again later.' }
 });
 
-// Basic root and health-check API
 app.get('/', (req: Request, res: Response) => {
   res.json({ status: 'Device Manager API is running', health: '/health' });
 });
@@ -51,7 +140,6 @@ app.get('/health', (req: Request, res: Response) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Routes
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/devices', apiLimiter, deviceRoutes);
 app.use('/api/messages', apiLimiter, messagesRoutes);
@@ -60,20 +148,19 @@ app.use('/api/contacts', apiLimiter, contactsRoutes);
 app.use('/api/locations', apiLimiter, locationsRoutes);
 app.use('/api/apps', apiLimiter, appsRoutes);
 
-// Global Error Handler - Hide Stack Traces in Prod
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  // If it's a known error or validation error, handle appropriately
-  // Log the actual error internally
   if (process.env.NODE_ENV !== 'test') {
-     console.error('Unhandled Server Error:', err.message);
+    console.error('Unhandled Server Error:', err.message);
   }
   res.status(500).json({ success: false, error: 'Internal Server Error' });
 });
 
 if (require.main === module) {
+  ensureSchema().then(() => {
     app.listen(port, '0.0.0.0', () => {
-        console.log(`Server is running on port ${port}`);
+      console.log(`Server is running on port ${port}`);
     });
+  });
 }
 
 export default app;

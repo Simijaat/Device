@@ -1,14 +1,18 @@
 package com.personal.devicemanager
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.personal.devicemanager.data.EncryptedPrefsManager
 import com.personal.devicemanager.databinding.ActivityLoginBinding
+import com.personal.devicemanager.network.DeviceStatusPayload
 import com.personal.devicemanager.network.LoginRequest
+import com.personal.devicemanager.network.RegisterDeviceRequest
 import com.personal.devicemanager.network.RetrofitClient
+import com.personal.devicemanager.utils.DeviceInfoUtils
 import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
@@ -43,12 +47,49 @@ class LoginActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 try {
                     val apiService = RetrofitClient.getApiService(this@LoginActivity)
-                    val response = apiService.login(LoginRequest(user, pass))
+                    var response = apiService.login(LoginRequest(user, pass))
+
+                    // If first-time setup where no master user exists yet, try initializing master account then login
+                    if (!response.isSuccessful && response.code() == 401) {
+                        try {
+                            val regRes = apiService.register(LoginRequest(user, pass))
+                            if (regRes.isSuccessful) {
+                                response = apiService.login(LoginRequest(user, pass))
+                            }
+                        } catch (_: Exception) {
+                        }
+                    }
 
                     if (response.isSuccessful && response.body()?.success == true) {
                         val token = response.body()?.token
                         if (!token.isNullOrBlank()) {
                             prefs.saveToken(token)
+
+                            // Immediately register device and upload initial battery/network status
+                            try {
+                                val authedApi = RetrofitClient.getApiService(this@LoginActivity)
+                                val deviceId = prefs.getOrCreateDeviceId()
+                                val deviceInfo = DeviceInfoUtils.getDeviceInfo(this@LoginActivity)
+                                authedApi.registerDevice(
+                                    RegisterDeviceRequest(
+                                        id = deviceId,
+                                        name = "${Build.MANUFACTURER} ${Build.MODEL}",
+                                        model = Build.MODEL,
+                                        android_version = "Android ${Build.VERSION.RELEASE}",
+                                        app_version = deviceInfo.appVersion
+                                    )
+                                )
+                                authedApi.updateDeviceStatus(
+                                    deviceId = deviceId,
+                                    status = DeviceStatusPayload(
+                                        battery_level = deviceInfo.batteryPercentage.coerceIn(0, 100),
+                                        is_charging = deviceInfo.isCharging,
+                                        network_type = deviceInfo.networkState
+                                    )
+                                )
+                            } catch (_: Exception) {
+                            }
+
                             Toast.makeText(this@LoginActivity, "Login successful", Toast.LENGTH_SHORT).show()
                             startActivity(Intent(this@LoginActivity, MainActivity::class.java))
                             finish()

@@ -61,9 +61,8 @@ android {
         }
     }
     lint {
-        isAbortOnError = false
-        isCheckReleaseBuilds = false
-        baseline = file("lint-baseline.xml")
+        abortOnError = false
+        checkReleaseBuilds = false
     }
 }
 

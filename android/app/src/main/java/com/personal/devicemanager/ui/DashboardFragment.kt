@@ -34,7 +34,15 @@ class DashboardFragment : Fragment() {
         val tvCalls = view.findViewById<TextView>(R.id.tvCalls)
         val tvApps = view.findViewById<TextView>(R.id.tvApps)
 
+        // Perform initial device registration & heartbeat sync when dashboard opens
+        viewModel.syncAll()
+
         btnSyncAll.setOnClickListener {
+            android.widget.Toast.makeText(
+                requireContext(),
+                "Synchronizing device status & authorized data...",
+                android.widget.Toast.LENGTH_SHORT
+            ).show()
             viewModel.syncAll()
         }
 
